@@ -3,7 +3,8 @@ package client;
 public class Request {
 	
 	private final HTTPCommands command;
-	private final String uri;
+	private final String uriHost;
+	private final String uriFile;
 	private final int port;
 	
 	public Request(String[] args) throws IllegalArgumentException{
@@ -18,7 +19,12 @@ public class Request {
 			throw new IllegalArgumentException();
 		}
 		
-		uri = args[1];
+		int index = args[1].indexOf("/",args[1].indexOf("."));
+		uriHost = args[1].substring(0, index);
+		uriFile = args[1].substring(index, args[1].length());
+		
+		System.out.println("host: "+uriHost);
+		System.out.println("file: "+uriFile);
 		
 		try{
 			if(args.length==2){
@@ -36,8 +42,12 @@ public class Request {
 		return this.command;
 	}
 	
-	public String getURI(){
-		return this.uri;
+	public String getURIHost(){
+		return this.uriHost;
+	}
+	
+	public String getURIFile(){
+		return this.uriFile;
 	}
 	
 	public int getPort(){

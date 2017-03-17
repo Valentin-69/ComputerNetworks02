@@ -22,7 +22,6 @@ public enum HTTPCommands {
 		public void execute(Request request) throws IllegalArgumentException, IllegalStateException{
 			Socket socket= getSocket(request);
 			String host = prompt("Your host name: ");
-			String file = prompt("File: "); 
 			PrintWriter pw;
 			try {
 				pw = new PrintWriter(socket.getOutputStream());
@@ -31,7 +30,7 @@ public enum HTTPCommands {
 				e.printStackTrace();
 				throw new IllegalArgumentException();
 			}
-			pw.println("GET /"+file+ "HTTP/1.1");
+			pw.println("GET "+request.getURIFile()+ " HTTP/1.1");
 			pw.println("Host: "+host);
 			pw.println("");
 			pw.flush();
@@ -127,12 +126,12 @@ public enum HTTPCommands {
 	
 	public static Socket getSocket(Request request){
 		try {
-			return new Socket(request.getURI(), request.getPort());
+			return new Socket(request.getURIHost(), request.getPort());
 		} catch (UnknownHostException e) {
 			System.out.println("The given uri isn't a valid host.");
 			throw new IllegalArgumentException();
 		} catch (IOException e) {
-			System.out.println("Unable to connect to: "+request.getURI()+":"+request.getPort());
+			System.out.println("Unable to connect to: "+request.getURIHost()+":"+request.getPort());
 			throw new IllegalArgumentException();
 		}
 	}
