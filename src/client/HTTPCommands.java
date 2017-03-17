@@ -23,37 +23,30 @@ public enum HTTPCommands {
 		public void execute(Request request) throws IllegalArgumentException, IllegalStateException{
 			Socket socket= getSocket(request);
 			String host = prompt("Your host name: ");
-			PrintWriter pw;
+			sentRequest(request, socket, host); // includes the fileWriter
+			FileWriter fw = initiateFileWriter("out.html"); // initiate the fileWriter with given fileName
+			BufferedReader br = initBuffReader(socket); // initiate the BufferedReader
+			System.out.println("RESULT: "); // Format info
+			System.out.println("");		    // Format info
+			String t;
+			writeOutput(fw, br); 	   // Writes the output of the GET command
+			closeReaderWriter(fw, br); // Closes used writer and reader
+			closeSocket(socket);
+
+		}
+
+		private void closeReaderWriter(FileWriter fw, BufferedReader br) {
 			try {
-				pw = new PrintWriter(socket.getOutputStream());
+				br.close();
+				fw.close();
+
 			} catch (IOException e) {
 				e.printStackTrace();
-				throw new IllegalArgumentException();
 			}
-			pw.println("GET "+request.getURIFile()+ " HTTP/1.1");
-			pw.println("Host: "+host);
-			pw.println("");
-			pw.flush();
-			BufferedReader br;
-			FileWriter fw;
-			try {			
-				br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			} catch (IOException e) {
-				System.out.println("could not get the inputStream of the socket");
-				throw new IllegalArgumentException();
-			}
-			System.out.println("RESULT: ");
-			System.out.println("");
-			String t;
-			
-			try {
-				fw = new FileWriter("out.txt");
-			} catch (IOException e1) {
-				System.out.println("could not create the fileWriter");
-				e1.printStackTrace();
-				throw new IllegalStateException();
-			}
+		}
 
+		private void writeOutput(FileWriter fw, BufferedReader br) {
+			String t;
 			try {
 				int i=0;
 				while((t = br.readLine()) != null){
@@ -66,15 +59,41 @@ public enum HTTPCommands {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			try {
-				br.close();
-				fw.close();
+		}
 
+		private FileWriter initiateFileWriter(String fileName) {
+			try {
+				FileWriter result = new FileWriter(fileName);
+				return result;
+			} catch (IOException e1) {
+				System.out.println("could not create the fileWriter");
+				e1.printStackTrace();
+				throw new IllegalStateException();
+			}
+		}
+
+		private BufferedReader initBuffReader(Socket socket) throws IllegalArgumentException{
+			try {			
+				BufferedReader result = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+				return result;
+			} catch (IOException e) {
+				System.out.println("could not get the inputStream of the socket");
+				throw new IllegalArgumentException();
+			}
+		}
+
+		private void sentRequest(Request request, Socket socket, String host) {
+			PrintWriter pw;
+			try {
+				pw = new PrintWriter(socket.getOutputStream());
 			} catch (IOException e) {
 				e.printStackTrace();
+				throw new IllegalArgumentException();
 			}
-			closeSocket(socket);
-
+			pw.println("GET "+request.getURIFile()+ " HTTP/1.1");
+			pw.println("Host: "+host);
+			pw.println("");
+			pw.flush();
 		}
 		
 	},
