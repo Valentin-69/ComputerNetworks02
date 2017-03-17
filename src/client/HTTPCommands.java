@@ -55,9 +55,13 @@ public enum HTTPCommands {
 			}
 
 			try {
+				int i=0;
 				while((t = br.readLine()) != null){
 					System.out.println(t);
-					fw.write("something");
+					if(i>6){
+						fw.write(t+"\r\n");
+					}
+					i++;
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
