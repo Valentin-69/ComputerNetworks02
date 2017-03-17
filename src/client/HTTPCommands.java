@@ -1,6 +1,7 @@
 package client;
 
 import java.io.BufferedReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -26,7 +27,6 @@ public enum HTTPCommands {
 			try {
 				pw = new PrintWriter(socket.getOutputStream());
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 				throw new IllegalArgumentException();
 			}
@@ -35,28 +35,40 @@ public enum HTTPCommands {
 			pw.println("");
 			pw.flush();
 			BufferedReader br;
-			try {
+			FileWriter fw;
+			try {			
 				br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			} catch (IOException e) {
 				System.out.println("could not get the inputStream of the socket");
 				throw new IllegalArgumentException();
 			}
+			System.out.println("RESULT: ");
+			System.out.println("");
 			String t;
+			
+			try {
+				fw = new FileWriter("out.txt");
+			} catch (IOException e1) {
+				System.out.println("could not create the fileWriter");
+				e1.printStackTrace();
+				throw new IllegalStateException();
+			}
+
 			try {
 				while((t = br.readLine()) != null){
 					System.out.println(t);
+					fw.write("something");
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			try {
 				br.close();
+				fw.close();
+
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-
 			closeSocket(socket);
 
 		}

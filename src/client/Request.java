@@ -23,9 +23,6 @@ public class Request {
 		uriHost = args[1].substring(0, index);
 		uriFile = args[1].substring(index, args[1].length());
 		
-		System.out.println("host: "+uriHost);
-		System.out.println("file: "+uriFile);
-		
 		try{
 			if(args.length==2){
 				port=80;
