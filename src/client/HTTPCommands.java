@@ -126,6 +126,7 @@ public enum HTTPCommands {
 	}
 	
 	public static Socket getSocket(Request request){
+		System.out.println("sexy");
 		try {
 			return new Socket(request.getURI(), request.getPort());
 		} catch (UnknownHostException e) {
