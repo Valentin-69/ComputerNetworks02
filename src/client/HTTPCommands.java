@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public enum HTTPCommands {
@@ -23,16 +24,14 @@ public enum HTTPCommands {
 		public void execute(Request request) throws IllegalArgumentException, IllegalStateException{
 			Socket socket= getSocket(request);
 			String host = prompt("Your host name: ");
-			sentRequest(request, socket, host); // includes the fileWriter
+			sendRequest(request, socket, host); // includes the fileWriter
 			FileWriter fw = initiateFileWriter("out.html"); // initiate the fileWriter with given fileName
 			BufferedReader br = initBuffReader(socket); // initiate the BufferedReader
 			System.out.println("RESULT: "); // Format info
 			System.out.println("");		    // Format info
-			String t;
-			writeOutput(fw, br); 	   // Writes the output of the GET command
+			manageOutput(fw, br); 	   // gets and writes the output of the GET command
 			closeReaderWriter(fw, br); // Closes used writer and reader
 			closeSocket(socket);
-
 		}
 
 		private void closeReaderWriter(FileWriter fw, BufferedReader br) {
@@ -45,15 +44,17 @@ public enum HTTPCommands {
 			}
 		}
 
-		private void writeOutput(FileWriter fw, BufferedReader br) {
-			String t;
+		private void manageOutput(FileWriter fw, BufferedReader br, String uriHost) {
 			try {
+				ArrayList<String> relativeImagePaths = new ArrayList<>();
+				String line;
 				int i=0;
-				while((t = br.readLine()) != null){
-					System.out.println(t);
+				while((line = br.readLine()) != null){
+					System.out.println(line);
 					if(i>6){
-						fw.write(t+"\r\n");
+						fw.write(line+"\r\n");
 					}
+					relativeImagePaths.addAll(getRelativeImagePathsFromLine(line, uriHost));
 					i++;
 				}
 			} catch (IOException e) {
@@ -63,7 +64,7 @@ public enum HTTPCommands {
 
 		private FileWriter initiateFileWriter(String fileName) {
 			try {
-				FileWriter result = new FileWriter(fileName);
+				FileWriter result = new FileWriter("output/"+fileName);
 				return result;
 			} catch (IOException e1) {
 				System.out.println("could not create the fileWriter");
@@ -82,7 +83,7 @@ public enum HTTPCommands {
 			}
 		}
 
-		private void sentRequest(Request request, Socket socket, String host) {
+		private void sendRequest(Request request, Socket socket, String host){
 			PrintWriter pw;
 			try {
 				pw = new PrintWriter(socket.getOutputStream());
@@ -94,6 +95,31 @@ public enum HTTPCommands {
 			pw.println("Host: "+host);
 			pw.println("");
 			pw.flush();
+		}
+		
+		private ArrayList<String> getRelativeImagePathsFromLine(String line, String uriHost){
+			ArrayList<String> result = new ArrayList<>();
+			int index =line.indexOf("<img");
+			while(index!=-1){
+				index = line.indexOf("src", index);
+				index = line.indexOf("\"",index);
+				String cutImage =  removeHost(line.substring(index+1,line.indexOf("\"",index)),uriHost);
+				if(!isAbsolutePath(cutImage)){
+					
+				}
+				index = line.indexOf("<img",index);
+			}
+			return result;
+		}
+
+		private boolean isAbsolutePath(String cutImage) {
+			return cutImage.contains("://") || (cutImage.length()>2 && cutImage.substring(0,3).equals("www"));
+		}
+		
+		private String removeHost(String url, String host){
+			if(! url.contains(host))
+				return url;
+			return url.substring(url.indexOf(host)+host.length(), url.length());
 		}
 		
 	},

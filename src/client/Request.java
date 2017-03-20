@@ -19,10 +19,19 @@ public class Request {
 			throw new IllegalArgumentException();
 		}
 		
-		int index = args[1].indexOf("/",args[1].indexOf("."));
-		uriHost = args[1].substring(0, index);
-		uriFile = args[1].substring(index, args[1].length());
+		if(args[1].contains("://")){
+			args[1]=args[1].substring(args[1].indexOf("://")+3, args[1].length());
+		}
 		
+		int index= args[1].indexOf("/",args[1].indexOf("."));
+		if(index!=-1){ //there is a / after a point in the string
+			uriHost = args[1].substring(0, index);
+			uriFile = args[1].substring(index, args[1].length());
+		}else{
+			uriHost = args[1];
+			uriFile = "/";
+		}
+
 		try{
 			if(args.length==2){
 				port=80;
