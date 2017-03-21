@@ -14,6 +14,8 @@ public class Request {
 		}
 		command = extractCommand(args);		                        // Set the command
 		String[] uriHostAndFile = extractUriHostAndFile(args); 		// setting the host and file
+		System.out.println("uriHost = " + uriHostAndFile[0]);
+		System.out.println("uriFile = " + uriHostAndFile[1]);
 		uriHost = uriHostAndFile[0];
 		uriFile = uriHostAndFile[1];
 		port = extractPort(args);		                            // setting the port
@@ -86,8 +88,10 @@ public class Request {
 	 * 			[command, uri, port]  port is optional.
 	 */
 	private HTTPCommands extractCommand(String[] args) {
+		System.out.println("args is: " + args[0]);
 		HTTPCommands result = HTTPCommands.getType(args[0]);
-		if(command==null){
+		System.out.println("result is: " + result);
+		if(result==null){
 			giveIllegalArgument("Wrong command");
 			throw new IllegalArgumentException();
 		}
