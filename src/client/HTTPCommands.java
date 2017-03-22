@@ -165,9 +165,106 @@ public enum HTTPCommands {
 		}
 
 		@Override
-		public void execute(Request request) {
-			// TODO Auto-generated method stub
-			
+		public void execute(Request request) throws IllegalArgumentException, IllegalStateException{
+			Socket socket= getSocket(request);
+			String host = prompt("Your host name: ");
+			PrintWriter writer = sendRequest(request, socket, host); // includes the fileWriter
+			FileWriter fw = initiateFileWriter("outHead.html"); // initiate the fileWriter with given fileName
+			BufferedReader br = initBuffReader(socket); // initiate the BufferedReader
+			System.out.println("RESULT: "); // Format info
+			System.out.println("");		    // Format info
+			manageOutput(fw, br,request.getURIHost(),writer,host,br); 	   // gets and writes the output of the GET command
+			closeReaderWriter(fw, br); // Closes used writer and reader
+			closeSocket(socket);	
+		}
+		
+		private void manageOutput(FileWriter fw, BufferedReader br, String uriHost, PrintWriter writerToHost, String hostName, BufferedReader socketReader) {
+			try {
+				ArrayList<String> relativeImagePaths = new ArrayList<>();
+				String line;
+				int i=0;
+				while((line = br.readLine()) != null){
+					System.out.println(line);
+					if(i>6){
+						fw.write(line+"\r\n");
+					}
+					//relativeImagePaths.addAll(getRelativeImagePathsFromLine(line, uriHost));
+					i++;
+				}
+				//System.out.println("images: "+relativeImagePaths);
+				//getFiles(relativeImagePaths,writerToHost, hostName,socketReader);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		private PrintWriter sendRequest(Request request, Socket socket, String host){
+			PrintWriter pw;
+			try {
+				pw = new PrintWriter(socket.getOutputStream());
+			} catch (IOException e) {
+				e.printStackTrace();
+				throw new IllegalArgumentException();
+			}
+			sendHeadRequest(pw,request.getURIFile(), host);
+			return pw;
+		}
+		
+		private void saveFile(String relativePath, BufferedReader socketReader) throws IOException {
+			if(relativePath.contains("/")){
+				File newFile = new File("outputHead/"+relativePath.substring(0,relativePath.indexOf("/")));
+				Files.createDirectory(newFile.toPath());
+			}
+			FileWriter writer = initiateFileWriter(relativePath);
+			String line;
+			while((line = socketReader.readLine()) != null){
+				writer.write(line+"\r\n");
+			}
+			writer.close();
+		}
+		
+		private FileWriter initiateFileWriter(String fileName) {
+			try {
+				FileWriter result = new FileWriter("output/"+fileName);
+				return result;
+			} catch (IOException e1) {
+				System.out.println("could not create the fileWriter for: "+fileName);
+				e1.printStackTrace();
+				throw new IllegalStateException();
+			}
+		}
+
+		private BufferedReader initBuffReader(Socket socket) throws IllegalArgumentException{
+			try {			
+				BufferedReader result = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+				return result;
+			} catch (IOException e) {
+				System.out.println("could not get the inputStream of the socket");
+				throw new IllegalArgumentException();
+			}
+		}
+		
+		private void sendHeadRequest(PrintWriter writer,String filePath, String host){
+			writer.println("HEAD "+filePath+ " HTTP/1.1");
+			writer.println("Host: "+host);
+			writer.println("");
+			writer.flush();
+		}
+		
+		private String removeHost(String url, String host){
+			if(! url.contains(host))
+				return url;
+			return url.substring(url.indexOf(host)+host.length(), url.length());
+		}
+		
+		private void closeReaderWriter(FileWriter fw, BufferedReader br) {
+			try {
+				br.close();
+				fw.close();
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 		
 	},
