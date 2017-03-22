@@ -168,37 +168,27 @@ public enum HTTPCommands {
 		public void execute(Request request) throws IllegalArgumentException, IllegalStateException{
 			Socket socket= getSocket(request);
 			String host = prompt("Your host name: ");
-			PrintWriter writer = sendRequest(request, socket, host); // includes the fileWriter
-			FileWriter fw = initiateFileWriter("outHead.html"); // initiate the fileWriter with given fileName
+			sendRequest(request, socket, host); // includes the fileWriter
 			BufferedReader br = initBuffReader(socket); // initiate the BufferedReader
 			System.out.println("RESULT: "); // Format info
 			System.out.println("");		    // Format info
-			manageOutput(fw, br,request.getURIHost(),writer,host,br); 	   // gets and writes the output of the GET command
-			closeReaderWriter(fw, br); // Closes used writer and reader
+			manageOutput(br); 	   // gets and writes the output of the GET command
+			closeReader(br); // Closes used writer and reader
 			closeSocket(socket);	
 		}
 		
-		private void manageOutput(FileWriter fw, BufferedReader br, String uriHost, PrintWriter writerToHost, String hostName, BufferedReader socketReader) {
+		private void manageOutput(BufferedReader br) {
 			try {
-				ArrayList<String> relativeImagePaths = new ArrayList<>();
 				String line;
-				int i=0;
 				while((line = br.readLine()) != null){
 					System.out.println(line);
-					if(i>6){
-						fw.write(line+"\r\n");
-					}
-					//relativeImagePaths.addAll(getRelativeImagePathsFromLine(line, uriHost));
-					i++;
 				}
-				//System.out.println("images: "+relativeImagePaths);
-				//getFiles(relativeImagePaths,writerToHost, hostName,socketReader);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 		
-		private PrintWriter sendRequest(Request request, Socket socket, String host){
+		private void sendRequest(Request request, Socket socket, String host){
 			PrintWriter pw;
 			try {
 				pw = new PrintWriter(socket.getOutputStream());
@@ -207,7 +197,6 @@ public enum HTTPCommands {
 				throw new IllegalArgumentException();
 			}
 			sendHeadRequest(pw,request.getURIFile(), host);
-			return pw;
 		}
 		
 		private void saveFile(String relativePath, BufferedReader socketReader) throws IOException {
@@ -257,11 +246,9 @@ public enum HTTPCommands {
 			return url.substring(url.indexOf(host)+host.length(), url.length());
 		}
 		
-		private void closeReaderWriter(FileWriter fw, BufferedReader br) {
+		private void closeReader(BufferedReader br) {
 			try {
 				br.close();
-				fw.close();
-
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
