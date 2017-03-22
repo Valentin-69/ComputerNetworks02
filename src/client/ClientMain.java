@@ -1,7 +1,7 @@
 package client;
 
 
-public class ClientMain {
+ class ClientMain {
 	
 	public static void main(String[] args) {
 		Request request;

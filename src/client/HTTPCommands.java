@@ -12,18 +12,18 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public enum HTTPCommands {
+enum HTTPCommands {
 	
 
 	GET{
 
 		@Override
-		public boolean isCorrectType(String type) {
+		protected boolean isCorrectType(String type) {
 			return type.equalsIgnoreCase("GET");
 		}
 
 		@Override
-		public void execute(Request request) throws IllegalArgumentException, IllegalStateException{
+		protected void executeRequest(Request request) throws IllegalArgumentException, IllegalStateException{
 			Socket socket= getSocket(request);
 			String host = prompt("Your host name: ");
 			PrintWriter writer = sendRequest(request, socket, host); // includes the fileWriter
@@ -164,12 +164,12 @@ public enum HTTPCommands {
 	HEAD{
 
 		@Override
-		public boolean isCorrectType(String type) {
+		protected boolean isCorrectType(String type) {
 			return type.equalsIgnoreCase("HEAD");
 		}
 
 		@Override
-		public void execute(Request request) throws IllegalArgumentException, IllegalStateException{
+		protected void executeRequest(Request request) throws IllegalArgumentException, IllegalStateException{
 			Socket socket= getSocket(request);
 			String host = prompt("Your host name: ");
 			PrintWriter writer = sendRequest(request, socket, host); // includes the fileWriter
@@ -275,12 +275,12 @@ public enum HTTPCommands {
 	PUT{
 
 		@Override
-		public boolean isCorrectType(String type) {
+		protected boolean isCorrectType(String type) {
 			return type.equalsIgnoreCase("PUT");
 		}
 
 		@Override
-		public void execute(Request request) {
+		protected void executeRequest(Request request) {
 			// TODO Auto-generated method stub
 			
 		}
@@ -289,23 +289,23 @@ public enum HTTPCommands {
 	POST{
 
 		@Override
-		public boolean isCorrectType(String type) {
+		protected boolean isCorrectType(String type) {
 			return type.equalsIgnoreCase("POST");
 		}
 
 		@Override
-		public void execute(Request request) {
+		protected void executeRequest(Request request) {
 			// TODO Auto-generated method stub
 			
 		}
 		
 	};
-	public static Scanner scanner = new Scanner(System.in);
+	protected static Scanner scanner = new Scanner(System.in);
 
-	public abstract boolean isCorrectType(String type);
-	public abstract void execute(Request request) throws IllegalArgumentException, IllegalStateException;
+	protected abstract boolean isCorrectType(String type);
+	protected abstract void executeRequest(Request request) throws IllegalArgumentException, IllegalStateException;
 
-	public static HTTPCommands getType(String type){
+	protected static HTTPCommands getType(String type){
 		for (HTTPCommands command : HTTPCommands.values()) {
 			if(command.isCorrectType(type)){
 				return command;
@@ -314,13 +314,13 @@ public enum HTTPCommands {
 		return null;
 	}
 	
-	public static String prompt(String message){
+	protected static String prompt(String message){
 		System.out.print(message);
     	String result = scanner.next();
 	    return result;
 	}
 	
-	public static Socket getSocket(Request request){
+	protected static Socket getSocket(Request request){
 		try {
 			return new Socket(request.getURIHost(), request.getPort());
 		} catch (UnknownHostException e) {
@@ -332,7 +332,7 @@ public enum HTTPCommands {
 		}
 	}
 	
-	public static void closeSocket(Socket socket){
+	protected static void closeSocket(Socket socket){
 		try {
 			socket.close();
 		} catch (IOException e) {
