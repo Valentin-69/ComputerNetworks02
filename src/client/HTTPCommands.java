@@ -51,9 +51,13 @@ public enum HTTPCommands {
 				ArrayList<String> relativeImagePaths = new ArrayList<>();
 				String line;
 				int i=0;
+				boolean headDone = false;
 				while((line = br.readLine()) != null){
 					System.out.println(line);
-					if(i>6){
+					if(line.isEmpty()){
+						headDone=true;
+					}
+					if(headDone){
 						fw.write(line+"\r\n");
 					}
 					relativeImagePaths.addAll(getRelativeImagePathsFromLine(line, uriHost));
