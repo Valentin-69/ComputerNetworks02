@@ -5,10 +5,11 @@ import java.net.ServerSocket;
 
 public class ServerMain {
 
-	protected static final String DEFAULT_FILE_NAME="index.html";
+	protected static final String DEFAULT_FILE_PATH="/index.html";
 	
 	@SuppressWarnings("resource")
 	public static void main(String[] args) {
+		new SafetyGui();
 		ServerSocket listeningSocket;
 		try {
 			listeningSocket = new ServerSocket(80);
@@ -26,4 +27,5 @@ public class ServerMain {
 			}
 		}
 	}
+	
 }

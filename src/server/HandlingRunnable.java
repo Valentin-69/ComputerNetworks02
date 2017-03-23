@@ -32,6 +32,7 @@ class HandlingRunnable implements Runnable{
 		request.respond(socket);
 		
 		try {
+			System.out.println("closing socket");
 			socket.close();
 		} catch (IOException e) {
 			e.printStackTrace();

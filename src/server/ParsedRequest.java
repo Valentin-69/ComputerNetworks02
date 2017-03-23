@@ -49,12 +49,10 @@ class ParsedRequest {
 			while(reader.ready()){
 				System.out.print(Character.toString((char) reader.read()));
 			}
-			reader.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 		System.out.println(this);
 
 	}

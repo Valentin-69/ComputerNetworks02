@@ -25,9 +25,10 @@ public enum HTTPCommands {
 
 		@Override
 		protected void respond(Socket socket, String file) {
-			if(file==null || file.isEmpty() || file.substring(0, 1)=="/"){
-				file=ServerMain.DEFAULT_FILE_NAME;
+			if(file==null || file.isEmpty() || (file.length()==1 && file.substring(0, 1).equals("/"))){
+				file=ServerMain.DEFAULT_FILE_PATH;
 			}
+			System.out.println("file: "+file);
 			BufferedInputStream fileStream = getBufferedInputStreamFromFileName(file);
 			if(fileStream==null){
 				respondWhenFileFails(socket, file);
@@ -44,6 +45,7 @@ public enum HTTPCommands {
 				while(fileStream.available()!=0){
 					socketStream.write(fileStream.read());
 				}
+				socketStream.flush();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
