@@ -1,13 +1,13 @@
 package client;
 
-public class Request {
+class Request {
 	
 	private final HTTPCommands command;
 	private final String uriHost;
 	private final String uriFile;
 	private final int port;
 	
-	public Request(String[] args) throws IllegalArgumentException{
+	protected Request(String[] args) throws IllegalArgumentException{
 		if(args.length<2){
 			giveIllegalArgument("Not enough arguments");
 			throw new IllegalArgumentException();
@@ -19,7 +19,7 @@ public class Request {
 		port = extractPort(args);		                            // setting the port
 	}
 	
-	public HTTPCommands getCommand(){
+	protected HTTPCommands getCommand(){
 		return this.command;
 	}
 	
@@ -95,7 +95,7 @@ public class Request {
 	}
 	
 	public void execute(){
-		command.execute(this);
+		command.executeRequest(this);
 	}
 	
 	public static void giveIllegalArgument(){

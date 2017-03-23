@@ -1,3 +1,4 @@
+
 package client;
 
 import java.io.BufferedReader;
@@ -12,18 +13,18 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public enum HTTPCommands {
+enum HTTPCommands {
 	
 
 	GET{
 
 		@Override
-		public boolean isCorrectType(String type) {
+		protected boolean isCorrectType(String type) {
 			return type.equalsIgnoreCase("GET");
 		}
 
 		@Override
-		public void execute(Request request) throws IllegalArgumentException, IllegalStateException{
+		protected void executeRequest(Request request) throws IllegalArgumentException, IllegalStateException{
 			Socket socket= getSocket(request);
 			String host = prompt("Your host name: ");
 			PrintWriter writer = sendRequest(request, socket, host); // includes the fileWriter
@@ -51,9 +52,13 @@ public enum HTTPCommands {
 				ArrayList<String> relativeImagePaths = new ArrayList<>();
 				String line;
 				int i=0;
+				boolean headDone = false;
 				while((line = br.readLine()) != null){
 					System.out.println(line);
-					if(i>6){
+					if(line.isEmpty()){
+						headDone=true;
+					}
+					if(headDone){
 						fw.write(line+"\r\n");
 					}
 					relativeImagePaths.addAll(getRelativeImagePathsFromLine(line, uriHost));
@@ -94,16 +99,6 @@ public enum HTTPCommands {
 				System.out.println("could not create the fileWriter for: "+fileName);
 				e1.printStackTrace();
 				throw new IllegalStateException();
-			}
-		}
-
-		private BufferedReader initBuffReader(Socket socket) throws IllegalArgumentException{
-			try {			
-				BufferedReader result = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-				return result;
-			} catch (IOException e) {
-				System.out.println("could not get the inputStream of the socket");
-				throw new IllegalArgumentException();
 			}
 		}
 
@@ -160,12 +155,12 @@ public enum HTTPCommands {
 	HEAD{
 
 		@Override
-		public boolean isCorrectType(String type) {
+		protected boolean isCorrectType(String type) {
 			return type.equalsIgnoreCase("HEAD");
 		}
 
 		@Override
-		public void execute(Request request) throws IllegalArgumentException, IllegalStateException{
+		public void executeRequest(Request request) throws IllegalArgumentException, IllegalStateException{
 			Socket socket= getSocket(request);
 			String host = prompt("Your host name: ");
 			sendRequest(request, socket, host); // includes the fileWriter
@@ -199,51 +194,11 @@ public enum HTTPCommands {
 			sendHeadRequest(pw,request.getURIFile(), host);
 		}
 		
-		private void saveFile(String relativePath, BufferedReader socketReader) throws IOException {
-			if(relativePath.contains("/")){
-				File newFile = new File("outputHead/"+relativePath.substring(0,relativePath.indexOf("/")));
-				Files.createDirectory(newFile.toPath());
-			}
-			FileWriter writer = initiateFileWriter(relativePath);
-			String line;
-			while((line = socketReader.readLine()) != null){
-				writer.write(line+"\r\n");
-			}
-			writer.close();
-		}
-		
-		private FileWriter initiateFileWriter(String fileName) {
-			try {
-				FileWriter result = new FileWriter("output/"+fileName);
-				return result;
-			} catch (IOException e1) {
-				System.out.println("could not create the fileWriter for: "+fileName);
-				e1.printStackTrace();
-				throw new IllegalStateException();
-			}
-		}
-
-		private BufferedReader initBuffReader(Socket socket) throws IllegalArgumentException{
-			try {			
-				BufferedReader result = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-				return result;
-			} catch (IOException e) {
-				System.out.println("could not get the inputStream of the socket");
-				throw new IllegalArgumentException();
-			}
-		}
-		
 		private void sendHeadRequest(PrintWriter writer,String filePath, String host){
 			writer.println("HEAD "+filePath+ " HTTP/1.1");
 			writer.println("Host: "+host);
 			writer.println("");
 			writer.flush();
-		}
-		
-		private String removeHost(String url, String host){
-			if(! url.contains(host))
-				return url;
-			return url.substring(url.indexOf(host)+host.length(), url.length());
 		}
 		
 		private void closeReader(BufferedReader br) {
@@ -258,12 +213,12 @@ public enum HTTPCommands {
 	PUT{
 
 		@Override
-		public boolean isCorrectType(String type) {
+		protected boolean isCorrectType(String type) {
 			return type.equalsIgnoreCase("PUT");
 		}
 
 		@Override
-		public void execute(Request request) {
+		protected void executeRequest(Request request) {
 			// TODO Auto-generated method stub
 			
 		}
@@ -272,23 +227,23 @@ public enum HTTPCommands {
 	POST{
 
 		@Override
-		public boolean isCorrectType(String type) {
+		protected boolean isCorrectType(String type) {
 			return type.equalsIgnoreCase("POST");
 		}
 
 		@Override
-		public void execute(Request request) {
+		protected void executeRequest(Request request) {
 			// TODO Auto-generated method stub
 			
 		}
 		
 	};
-	public static Scanner scanner = new Scanner(System.in);
+	protected static Scanner scanner = new Scanner(System.in);
 
-	public abstract boolean isCorrectType(String type);
-	public abstract void execute(Request request) throws IllegalArgumentException, IllegalStateException;
+	protected abstract boolean isCorrectType(String type);
+	protected abstract void executeRequest(Request request) throws IllegalArgumentException, IllegalStateException;
 
-	public static HTTPCommands getType(String type){
+	protected static HTTPCommands getType(String type){
 		for (HTTPCommands command : HTTPCommands.values()) {
 			if(command.isCorrectType(type)){
 				return command;
@@ -297,13 +252,13 @@ public enum HTTPCommands {
 		return null;
 	}
 	
-	public static String prompt(String message){
+	protected static String prompt(String message){
 		System.out.print(message);
     	String result = scanner.next();
 	    return result;
 	}
 	
-	public static Socket getSocket(Request request){
+	protected static Socket getSocket(Request request){
 		try {
 			return new Socket(request.getURIHost(), request.getPort());
 		} catch (UnknownHostException e) {
@@ -315,12 +270,22 @@ public enum HTTPCommands {
 		}
 	}
 	
-	public static void closeSocket(Socket socket){
+	protected static void closeSocket(Socket socket){
 		try {
 			socket.close();
 		} catch (IOException e) {
 			System.out.println("could not close the socket");
 			throw new IllegalStateException();
+		}
+	}
+	
+	private static BufferedReader initBuffReader(Socket socket) throws IllegalArgumentException{
+		try {			
+			BufferedReader result = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			return result;
+		} catch (IOException e) {
+			System.out.println("could not get the inputStream of the socket");
+			throw new IllegalArgumentException();
 		}
 	}
 }
