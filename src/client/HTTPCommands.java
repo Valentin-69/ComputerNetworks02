@@ -13,6 +13,8 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import javax.swing.plaf.synth.SynthSeparatorUI;
+
 enum HTTPCommands {
 	
 
@@ -219,8 +221,9 @@ enum HTTPCommands {
 
 		@Override
 		protected void executeRequest(Request request) {
-			// TODO Auto-generated method stub
-			
+			Socket socket= getSocket(request);
+			String host = prompt("Your host name: ");
+			closeSocket(socket);
 		}
 		
 	},
@@ -233,16 +236,99 @@ enum HTTPCommands {
 
 		@Override
 		protected void executeRequest(Request request) {
-			// TODO Auto-generated method stub
-			
+			Socket socket= getSocket(request);
+			String host = prompt("Your host name: ");
+			// standaard body heeft de vorm: param=value
+			String body = prompt("Your message body: ");
+			sendRequest(request, socket, host, body); // includes the fileWriter
+			BufferedReader br = initBuffReader(socket); // initiate the BufferedReader
+			System.out.println("RESULT: "); // Format info
+			System.out.println("");		    // Format info
+			manageOutput(br); 	   // gets and writes the output of the GET command
+			closeReader(br); // Closes used writer and reader
+			closeSocket(socket);
+		}
+		/*
+		 * ik ben niet zeker of dit text/http of application/x-www-form-urlencoded moet zijn
+		 */
+		private final String textType = "application/x-www-form-urlencoded";
+		
+		private void manageOutput(BufferedReader br) {
+			try {
+				String line;
+				while((line = br.readLine()) != null){
+					System.out.println(line);
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		private void sendRequest(Request request, Socket socket, String host, String body){
+			PrintWriter pw;
+			try {
+				pw = new PrintWriter(socket.getOutputStream());
+			} catch (IOException e) {
+				e.printStackTrace();
+				throw new IllegalArgumentException();
+			}
+			// ik weet niet zeker of de filepath nu (request.getURIHost()+request.getURIFile() )
+			// moet zijn of gewoon (request.getURIFile)
+			sendPostRequest(pw,request.getURIFile(), host, body);
+		}
+		
+		/*
+		 * Vergeet zeker de blanco lijnen niet!
+		 */
+		private void sendPostRequest(PrintWriter writer,String filePath, String host, String body){
+			writer.println("POST "+filePath+ " HTTP/1.1");
+			writer.println("Host: "+host);
+			writer.println("Content-Type: " + textType);
+			writer.println("Content-Length: " + body.length());
+			writer.println("");
+			writer.println(body);
+			writer.println("");
+			writer.flush();
+		}
+		
+		private void closeReader(BufferedReader br) {
+			try {
+				br.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 		
 	};
+	
 	protected static Scanner scanner = new Scanner(System.in);
 
 	protected abstract boolean isCorrectType(String type);
 	protected abstract void executeRequest(Request request) throws IllegalArgumentException, IllegalStateException;
 
+	private void sendRequest(Request request, Socket socket, String host){
+		PrintWriter pw;
+		try {
+			pw = new PrintWriter(socket.getOutputStream());
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new IllegalArgumentException();
+		}
+		sendHeadRequest(pw,request.getURIFile(), host);
+	}
+	private void sendHeadRequest(PrintWriter writer,String filePath, String host){
+		writer.println("HEAD "+filePath+ " HTTP/1.1");
+		writer.println("Host: "+host);
+		writer.println("");
+		writer.flush();
+	}
+	private void closeReader(BufferedReader br) {
+		try {
+			br.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	protected static HTTPCommands getType(String type){
 		for (HTTPCommands command : HTTPCommands.values()) {
 			if(command.isCorrectType(type)){
