@@ -22,7 +22,7 @@ class ParsedRequest {
 			System.out.println(line);
 			if(line==null){
 				badRequest(socket);
-				return;
+				throw new IllegalStateException();
 			}
 			try{
 				int indexToFirstSpace =line.indexOf(" ");
@@ -57,7 +57,7 @@ class ParsedRequest {
 
 	}
 	
-	private void badRequest(Socket socket) throws IllegalStateException{
+	private void badRequest(Socket socket){
 		System.out.println("bad request");
 	}
 	

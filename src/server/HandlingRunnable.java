@@ -25,7 +25,7 @@ class HandlingRunnable implements Runnable{
 		try{
 			request = new ParsedRequest(reader,socket);
 		}catch(IllegalStateException e){
-			System.out.println("closing thread, cause: failed request");
+			System.out.println("closing thread, cause: failed or bad request");
 			return;
 		}
 		
@@ -40,6 +40,15 @@ class HandlingRunnable implements Runnable{
 			return;
 		}
 		System.out.println("closing thread, cause: done");
+		System.out.println();
+		System.out.println();
+		System.out.println();
+		System.out.println();
+		try {
+			this.finalize();
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
 	}
 
 }

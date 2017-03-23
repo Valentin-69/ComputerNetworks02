@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.util.Scanner;
 
 public enum HTTPCommands {
@@ -24,7 +25,7 @@ public enum HTTPCommands {
 		}
 
 		@Override
-		protected void respond(Socket socket, String file) {
+		protected void respond(Socket socket, String file){
 			if(file==null || file.isEmpty() || (file.length()==1 && file.substring(0, 1).equals("/"))){
 				file=ServerMain.DEFAULT_FILE_PATH;
 			}
@@ -40,7 +41,7 @@ public enum HTTPCommands {
 				System.out.println("could not create stream to socket");
 				return;
 			}
-			
+			writeOKHeaderToStream(socketStream);
 			try {
 				while(fileStream.available()!=0){
 					socketStream.write(fileStream.read());
@@ -149,6 +150,18 @@ public enum HTTPCommands {
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
+		}
+	}
+	
+	protected static void writeOKHeaderToStream(BufferedOutputStream socketStream){
+		String okHead = "HTTP/1.1 200 OK \r\n\r\n";
+		for (int i=0;i<okHead.length();i++) {
+			try {
+				socketStream.write((int) okHead.charAt(i));
+			} catch (IOException e) {
+				e.printStackTrace();
+				return;
+			}
 		}
 	}
 	
