@@ -5,6 +5,8 @@ import java.net.ServerSocket;
 
 public class ServerMain {
 
+	protected static final String DEFAULT_FILE_NAME="index.html";
+	
 	@SuppressWarnings("resource")
 	public static void main(String[] args) {
 		ServerSocket listeningSocket;

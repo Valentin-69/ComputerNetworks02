@@ -1,10 +1,7 @@
 package server;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.Socket;
 
 class HandlingRunnable implements Runnable{
@@ -17,25 +14,31 @@ class HandlingRunnable implements Runnable{
 	
 	@Override
 	public void run() {
-		BufferedReader reader;
+		BufferedReader reader = HTTPCommands.getReaderFromSocket(socket);
+		if(reader==null){
+			System.out.println("closing thread, cause: failed BufferedReader");
+			return;
+		}
+		
+		
+		ParsedRequest request;
+		try{
+			request = new ParsedRequest(reader,socket);
+		}catch(IllegalStateException e){
+			System.out.println("closing thread, cause: failed request");
+			return;
+		}
+		
+		request.respond(socket);
+		
 		try {
-			reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			socket.close();
 		} catch (IOException e) {
 			e.printStackTrace();
+			System.out.println("closing thread, cause: failed socket closing");
 			return;
-		}		
-		
-		ParsedRequest request = new ParsedRequest(reader);
-		
-		BufferedWriter writer;
-		try {
-			writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-		} catch (IOException e) {
-			e.printStackTrace();
-			return;
-		}	
-		
-		
+		}
+		System.out.println("closing thread, cause: done");
 	}
 
 }
