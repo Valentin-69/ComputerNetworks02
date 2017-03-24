@@ -320,7 +320,7 @@ enum HTTPCommands {
 			Socket socket= getSocket(request);
 			String host = prompt("Your host name: ");
 			// standaard body heeft de vorm: param=value
-			String body = promptPUTBody("Your message: ");
+			String body = promptLines("Your message: ");
 			System.out.println("body with promptPUTBody is: " + body); // TODO debug info
 			sendRequest(request, socket, host, body); // includes the fileWriter
 			BufferedReader br = initBuffReader(socket); // initiate the BufferedReader
@@ -333,16 +333,6 @@ enum HTTPCommands {
 		/*
 		 * ik ben niet zeker of dit text/http of application/x-www-form-urlencoded moet zijn
 		 */
-		
-		protected String promptPUTBody(String message){
-			System.out.print(message);
-	    	String result = scanner.next();
-	    	if (scanner.hasNextLine()){
-		    	result += scanner.nextLine();
-	    	}
-		    return result;
-		}
-		
 		private final String textType = "text/http";
 		
 		private void manageOutput(BufferedReader br) {
@@ -496,6 +486,12 @@ enum HTTPCommands {
 	 */
 	protected abstract void executeRequest(Request request) throws IllegalArgumentException, IllegalStateException;
 
+	/**
+	 * Closes the given BufferedReader.
+	 * 
+	 * @param br
+	 * 			The BufferedReader to close.
+	 */
 	protected static void closeReader(BufferedReader br) {
 		try {
 			br.close();
@@ -503,6 +499,14 @@ enum HTTPCommands {
 			e.printStackTrace();
 		}
 	}
+	/**
+	 * Gets the type of the given type;
+	 * 
+	 * @param type
+	 * 			The type of which the type must be returned.
+	 * @return An HTTPCommand if the given type is one of the possible commands: GET, HEAD, PUT or POST.
+	 * 			Else null.
+	 */
 	protected static HTTPCommands getType(String type){
 		for (HTTPCommands command : HTTPCommands.values()) {
 			if(command.isCorrectType(type)){
@@ -512,9 +516,36 @@ enum HTTPCommands {
 		return null;
 	}
 	
+	/**
+	 * Prints the given message to the user and returns the first word of input from the user.
+	 * All other input will be ignored and deleted. 
+	 * 
+	 * @param message
+	 * 			What the scanner shows to the user.
+	 * @return The first word of input from the user.
+	 */
 	protected static String prompt(String message){
 		System.out.print(message);
     	String result = scanner.next();
+    	if (scanner.hasNext()){
+    		scanner.nextLine();
+    	}
+	    return result;
+	}
+	
+	/**
+	 * Prints the given message to the user and returns the input from the user.
+	 * 
+	 * @param message
+	 * 			What the scanner shows to the user.
+	 * @return The input from the user.
+	 */
+	protected String promptLines(String message){
+		System.out.print(message);
+    	String result = scanner.next();
+    	if (scanner.hasNextLine()){
+	    	result += scanner.nextLine();
+    	}
 	    return result;
 	}
 	
@@ -530,6 +561,12 @@ enum HTTPCommands {
 		}
 	}
 	
+	/**
+	 * Closes the given socket.
+	 * 
+	 * @param socket
+	 * 			The socket to close.
+	 */
 	protected static void closeSocket(Socket socket){
 		try {
 			socket.close();
