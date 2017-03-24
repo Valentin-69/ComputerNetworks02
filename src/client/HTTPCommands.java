@@ -105,7 +105,6 @@ enum HTTPCommands {
 			try {
 				ArrayList<String> relativeImagePaths = new ArrayList<>();
 				String line;
-				int i=0;
 				boolean headDone = false;
 				while((line = br.readLine()) != null){
 					System.out.println(line);
@@ -116,10 +115,9 @@ enum HTTPCommands {
 						fw.write(line+"\r\n");
 					}
 					relativeImagePaths.addAll(getRelativeImagePathsFromLine(line, uriHost));
-					i++;
 				}
 				System.out.println("images: "+relativeImagePaths);
-				//getFiles(relativeImagePaths,writerToHost, hostName,socketReader);
+				getFiles(relativeImagePaths,writerToHost, hostName,socketReader);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -135,8 +133,14 @@ enum HTTPCommands {
 		 */
 		private void getFiles(ArrayList<String> relativeFilePaths, PrintWriter writerToHost, String hostName,BufferedReader socketReader) throws IOException {
 			for (String relativePath : relativeFilePaths) {
+				if(!relativePath.substring(0, 1).equals("/")){
+					relativePath = "/"+relativePath;
+				}
+				System.out.println("getting "+relativePath);
 				sendGetRequest(writerToHost, relativePath, hostName);
+				System.out.println("sent request");
 				saveFile(relativePath, socketReader);
+				System.out.println("saved file");
 			}
 		}
 
@@ -147,16 +151,20 @@ enum HTTPCommands {
 		 * @throws IOException
 		 */
 		private void saveFile(String relativePath, BufferedReader socketReader) throws IOException {
-			if(relativePath.contains("/")){
-				File newFile = new File("output/"+relativePath.substring(0,relativePath.indexOf("/")));
-				Files.createDirectory(newFile.toPath());
-			}
 			FileWriter writer = initiateFileWriter(relativePath);
-			String line;
-			while((line = socketReader.readLine()) != null){
-				writer.write(line+"\r\n");
+			while(!socketReader.ready()){
+				System.out.println("waiting");
+				try {
+					Thread.sleep(200);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
-			writer.close();
+			while(socketReader.ready()){
+				writer.write(socketReader.read());
+			}
+			writer.flush();
 		}
 
 		/**
