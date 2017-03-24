@@ -286,6 +286,17 @@ enum HTTPCommands {
 			}
 		}
 		
+		/**
+		 * Initiates a PrintWriter that sends data to the server that this client
+		 * is connected to and activates the actual request.
+		 * 
+		 * @param request
+		 * 			This request contains the method, URI and port number.
+		 * @param socket
+		 * 			The socket that is connected to the server.
+		 * @param host
+		 * 			The host used in HTTP/1.1
+		 */
 		private void sendRequest(Request request, Socket socket, String host){
 			PrintWriter pw;
 			try {
@@ -297,21 +308,23 @@ enum HTTPCommands {
 			sendHeadRequest(pw,request.getURIFile(), host);
 		}
 		
+		/**
+		 * Sends the actual HEAD request to the connected server.
+		 * 
+		 * @param writer
+		 * 			The PrintWriter that sends the data to the connected server.
+		 * @param filePath
+		 * 			The path of the file the client wants to get.
+		 * @param host
+		 * 			The host used for HTTP/1.1.
+		 */
 		private void sendHeadRequest(PrintWriter writer,String filePath, String host){
 			writer.println("HEAD "+filePath+ " HTTP/1.1");
 			writer.println("Host: "+host);
 			writer.println("");
 			writer.flush();
 		}
-		
-		private void closeReader(BufferedReader br) {
-			try {
-				br.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		
+				
 	},
 	PUT{
 		/**
@@ -329,7 +342,7 @@ enum HTTPCommands {
 			Socket socket= getSocket(request);
 			String host = prompt("Your host name: ");
 			// standaard body heeft de vorm: param=value
-			String body = promptPUTBody("Your message: ");
+			String body = promptLines("Your message: ");
 			System.out.println("body with promptPUTBody is: " + body); // TODO debug info
 			sendRequest(request, socket, host, body); // includes the fileWriter
 			BufferedReader br = initBuffReader(socket); // initiate the BufferedReader
@@ -342,15 +355,6 @@ enum HTTPCommands {
 		/*
 		 * ik ben niet zeker of dit text/http of application/x-www-form-urlencoded moet zijn
 		 */
-		
-		protected String promptPUTBody(String message){
-			System.out.print(message);
-	    	String result = scanner.next();
-	    	if (scanner.hasNextLine()){
-		    	result += scanner.nextLine();
-	    	}
-		    return result;
-		}
 		
 		private final String textType = "text/http";
 		
@@ -398,15 +402,6 @@ enum HTTPCommands {
 			writer.println("");
 			writer.flush();
 		}
-		
-		private void closeReader(BufferedReader br) {
-			try {
-				br.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		
 	},
 	POST{
 		/**
@@ -481,16 +476,7 @@ enum HTTPCommands {
 			writer.println(body);
 			writer.println("");
 			writer.flush();
-		}
-		
-		private void closeReader(BufferedReader br) {
-			try {
-				br.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		
+		}		
 	};
 	
 	protected static Scanner scanner = new Scanner(System.in);
@@ -514,13 +500,7 @@ enum HTTPCommands {
 		writer.println("");
 		writer.flush();
 	}
-	private void closeReader(BufferedReader br) {
-		try {
-			br.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+
 	protected static HTTPCommands getType(String type){
 		for (HTTPCommands command : HTTPCommands.values()) {
 			if(command.isCorrectType(type)){
@@ -530,9 +510,36 @@ enum HTTPCommands {
 		return null;
 	}
 	
+	/**
+	 * Prints the given message and returns the first word input of the user.
+	 * All other input will be ignored and deleted.
+	 * 
+	 * @param message
+	 * 			What the scanner asks as input from the user.
+	 * @return The first word input of the user.
+	 */
 	protected static String prompt(String message){
 		System.out.print(message);
     	String result = scanner.next();
+    	if (scanner.hasNext()){
+    		scanner.nextLine();
+    	}
+	    return result;
+	}
+	
+	/**
+	 * Prints the given message and returns the input of the user.
+	 * 
+	 * @param message
+	 * 			What the scanner asks as input from the user.
+	 * @return The input of the user.
+	 */
+	protected static String promptLines(String message){
+		System.out.print(message);
+    	String result = scanner.next();
+    	if (scanner.hasNextLine()){
+	    	result += scanner.nextLine();
+    	}
 	    return result;
 	}
 	
@@ -564,6 +571,21 @@ enum HTTPCommands {
 		} catch (IOException e) {
 			System.out.println("could not get the inputStream of the socket");
 			throw new IllegalArgumentException();
+		}
+	}
+	
+	
+	/**
+	 * Closes the given BufferedReader.
+	 * 
+	 * @param br
+	 * 			The BufferedReader to close.
+	 */
+	protected static void closeReader(BufferedReader br) {
+		try {
+			br.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 }
