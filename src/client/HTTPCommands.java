@@ -94,7 +94,7 @@ enum HTTPCommands {
 		 * @param hostName
 		 * 			String used as host for HTTP/1.1
 		 * @param socketReader
-		 * 			TODO not sure/ Same as br.
+		 * 			Same as br. TODO im not sure about the meaning of socketReader.
 		 */
 		private void manageOutput(FileWriter fw, BufferedReader br, String uriHost, PrintWriter writerToHost, String hostName, BufferedReader socketReader) {
 			try {
@@ -174,7 +174,7 @@ enum HTTPCommands {
 
 		/**
 		 * Initiates a PrintWriter that sends data to the server that this client
-		 * is connected to and activates the actual request.
+		 * is connected to and returns it. It also activates the actual request.
 		 * 
 		 * @param request
 		 * 			This request contains the method, URI and port number.
@@ -183,8 +183,10 @@ enum HTTPCommands {
 		 * @param host
 		 * 			The host used in HTTP/1.1
 		 * @return	A PrintWriter which sends data to the connected server.
+		 * @throws IllegalArgumentException
+		 * 			When an IOException occurs while trying to create the PrintWriter.
 		 */
-		private PrintWriter sendRequest(Request request, Socket socket, String host){
+		private PrintWriter sendRequest(Request request, Socket socket, String host) throws IllegalArgumentException{
 			PrintWriter pw;
 			try {
 				pw = new PrintWriter(socket.getOutputStream());
@@ -310,6 +312,12 @@ enum HTTPCommands {
 			closeSocket(socket);	
 		}
 		
+		/**
+		 * Manages the result of the server by printing it in the console.
+		 * 
+		 * @param br
+		 * 			BufferedReader used to read the answer of the server.
+		 */
 		private void manageOutput(BufferedReader br) {
 			try {
 				String line;
@@ -321,7 +329,21 @@ enum HTTPCommands {
 			}
 		}
 		
-		private void sendRequest(Request request, Socket socket, String host){
+
+		/**
+		 * Initiates a PrintWriter that sends data to the server that this client
+		 * is connected to and activates the actual request.
+		 * 
+		 * @param request
+		 * 			This request contains the method, URI and port number.
+		 * @param socket
+		 * 			The socket that is connected to the server.
+		 * @param host
+		 * 			The host used in HTTP/1.1
+		 * @throws IllegalArgumentException
+		 * 			When an IOException occurs while trying to create the PrintWriter.
+		 */
+		private void sendRequest(Request request, Socket socket, String host) throws IllegalArgumentException{
 			PrintWriter pw;
 			try {
 				pw = new PrintWriter(socket.getOutputStream());
@@ -332,6 +354,16 @@ enum HTTPCommands {
 			sendHeadRequest(pw,request.getURIFile(), host);
 		}
 		
+		/**
+		 * Sends the actual HEAD request to the connected server.
+		 * 
+		 * @param writer
+		 * 			The PrintWriter that sends the data to the connected server.
+		 * @param filePath
+		 * 			The path of the file the client wants to get.
+		 * @param host
+		 * 			The host used for HTTP/1.1.
+		 */
 		private void sendHeadRequest(PrintWriter writer,String filePath, String host){
 			writer.println("HEAD "+filePath+ " HTTP/1.1");
 			writer.println("Host: "+host);
@@ -373,7 +405,6 @@ enum HTTPCommands {
 			String host = prompt("Your host name: ");
 			// standaard body heeft de vorm: param=value
 			String body = promptLines("Your message: ");
-			System.out.println("body with promptPUTBody is: " + body); // TODO debug info
 			sendRequest(request, socket, host, body); // includes the fileWriter
 			BufferedReader br = initBuffReader(socket); // initiate the BufferedReader
 			System.out.println("RESULT: "); // Format info
@@ -382,11 +413,13 @@ enum HTTPCommands {
 			closeReader(br); // Closes used writer and reader
 			closeSocket(socket);
 		}
-		/*
-		 * ik ben niet zeker of dit text/http of application/x-www-form-urlencoded moet zijn
+
+		/**
+		 * Manages the result of the server by printing it in the console.
+		 * 
+		 * @param br
+		 * 			BufferedReader used to read the answer of the server.
 		 */
-		private final String textType = "text/http";
-		
 		private void manageOutput(BufferedReader br) {
 			try {
 				String line;
@@ -398,7 +431,20 @@ enum HTTPCommands {
 			}
 		}
 		
-		private void sendRequest(Request request, Socket socket, String host, String body){
+		/**
+		 * Initiates a PrintWriter that sends data to the server that this client
+		 * is connected to and activates the actual request.
+		 * 
+		 * @param request
+		 * 			This request contains the method, URI and port number.
+		 * @param socket
+		 * 			The socket that is connected to the server.
+		 * @param host
+		 * 			The host used in HTTP/1.1
+		 * @throws IllegalArgumentException
+		 * 			When an IOException occurs while trying to create the PrintWriter.
+		 */
+		private void sendRequest(Request request, Socket socket, String host, String body) throws IllegalArgumentException{
 			PrintWriter pw;
 			try {
 				pw = new PrintWriter(socket.getOutputStream());
@@ -409,10 +455,23 @@ enum HTTPCommands {
 			sendPutRequest(pw,request.getURIFile(), host, body);
 		}
 		
+		
+		/**
+		 * Sends the actual PUT request to the connected server.
+		 * 
+		 * @param writer
+		 * 			The PrintWriter that sends the data to the connected server.
+		 * @param filePath
+		 * 			The path of the file the client wants to get.
+		 * @param host
+		 * 			The host used for HTTP/1.1.
+		 * @param body
+		 * 			The body of the put request.
+		 */
 		private void sendPutRequest(PrintWriter writer,String filePath, String host, String body){
 			writer.println("PUT "+filePath+ " HTTP/1.1");
 			writer.println("Host: "+host);
-			writer.println("Content-Type: " + textType);
+			writer.println("Content-Type: " + httpText);
 			writer.println("Content-Length: " + body.length());
 			writer.println("");
 			writer.println(body);
@@ -462,11 +521,13 @@ enum HTTPCommands {
 			closeReader(br); // Closes used writer and reader
 			closeSocket(socket);
 		}
-		/*
-		 * ik ben niet zeker of dit text/http of application/x-www-form-urlencoded moet zijn
+
+		/**
+		 * Manages the result of the server by printing it in the console.
+		 * 
+		 * @param br
+		 * 			BufferedReader used to read the answer of the server.
 		 */
-		private final String textType = "text/http";
-		
 		private void manageOutput(BufferedReader br) {
 			try {
 				String line;
@@ -478,6 +539,19 @@ enum HTTPCommands {
 			}
 		}
 		
+		/**
+		 * Initiates a PrintWriter that sends data to the server that this client
+		 * is connected to and activates the actual request.
+		 * 
+		 * @param request
+		 * 			This request contains the method, URI and port number.
+		 * @param socket
+		 * 			The socket that is connected to the server.
+		 * @param host
+		 * 			The host used in HTTP/1.1
+		 * @throws IllegalArgumentException
+		 * 			When an IOException occurs while trying to create the PrintWriter.
+		 */
 		private void sendRequest(Request request, Socket socket, String host, String body){
 			PrintWriter pw;
 			try {
@@ -486,15 +560,25 @@ enum HTTPCommands {
 				e.printStackTrace();
 				throw new IllegalArgumentException();
 			}
-			// ik weet niet zeker of de filepath nu (request.getURIHost()+request.getURIFile() )
-			// moet zijn of gewoon (request.getURIFile)
 			sendPostRequest(pw,request.getURIFile(), host, body);
 		}
 
+		/**
+		 * Sends the actual POST request to the connected server.
+		 * 
+		 * @param writer
+		 * 			The PrintWriter that sends the data to the connected server.
+		 * @param filePath
+		 * 			The path of the file the client wants to get.
+		 * @param host
+		 * 			The host used for HTTP/1.1.
+		 * @param body
+		 * 			The body of the post request.
+		 */
 		private void sendPostRequest(PrintWriter writer,String filePath, String host, String body){
 			writer.println("POST "+filePath+ " HTTP/1.1");
 			writer.println("Host: "+host);
-			writer.println("Content-Type: " + textType);
+			writer.println("Content-Type: " + httpText);
 			writer.println("Content-Length: " + body.length());
 			writer.println("");
 			writer.println(body);
@@ -655,4 +739,15 @@ enum HTTPCommands {
 			throw new IllegalArgumentException();
 		}
 	}
+
+	/**
+	 * Constant used to indicate the content-type of http text.
+	 */
+	private final static String httpText = "text/http";
+	
+	/**
+	 * Constant used to indicate the content-type of an url encoded message.
+	 */
+	private final String urlEncoded = "application/x-www-form-urlencoded";
+	
 }
