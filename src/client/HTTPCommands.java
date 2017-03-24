@@ -517,8 +517,7 @@ enum HTTPCommands {
 		protected void executeRequest(Request request) {
 			Socket socket= getSocket(request);
 			String host = prompt("Your host name: ");
-			// standaard body heeft de vorm: param=value
-			String body = prompt("Your message body: ");
+			String body = prompt("Your message body url-encoded: ");
 			sendRequest(request, socket, host, body); // includes the fileWriter
 			BufferedReader br = initBuffReader(socket); // initiate the BufferedReader
 			System.out.println("RESULT: "); // Format info
@@ -584,7 +583,7 @@ enum HTTPCommands {
 		private void sendPostRequest(PrintWriter writer,String filePath, String host, String body){
 			writer.println("POST "+filePath+ " HTTP/1.1");
 			writer.println("Host: "+host);
-			writer.println("Content-Type: " + httpText);
+			writer.println("Content-Type: " +urlEncoded);
 			writer.println("Content-Length: " + body.length());
 			writer.println("");
 			writer.println(body);
@@ -665,9 +664,8 @@ enum HTTPCommands {
 	protected static String prompt(String message){
 		System.out.print(message);
     	String result = scanner.next();
-    	if (scanner.hasNext()){
-    		scanner.nextLine();
-    	}
+   		scanner.nextLine();
+    	System.out.println("result is " + result);
 	    return result;
 	}
 	
@@ -684,6 +682,7 @@ enum HTTPCommands {
     	if (scanner.hasNextLine()){
 	    	result += scanner.nextLine();
     	}
+    	System.out.println("result is " + result);
 	    return result;
 	}
 	
@@ -749,11 +748,11 @@ enum HTTPCommands {
 	/**
 	 * Constant used to indicate the content-type of http text.
 	 */
-	private final static String httpText = "text/http";
+	protected final static String httpText = "text/http";
 	
 	/**
 	 * Constant used to indicate the content-type of an url encoded message.
 	 */
-	private final String urlEncoded = "application/x-www-form-urlencoded";
+	protected final String urlEncoded = "application/x-www-form-urlencoded";
 	
 }
