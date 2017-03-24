@@ -12,9 +12,24 @@ class Request {
 	private final String uriFile;
 	private final int port;
 	
+	/** 
+	 * Create a new request with the given argument. The given argument should look like this:
+	 * [command, uri, port]. The port is optional, the other two are not. From the Uri it
+	 * extracts the uri host and the uri file. If there is no port given in the args, it is set
+	 * to the default number 80.
+	 * 
+	 * @param args
+	 * 			[Command, uri, port] with port optional.
+	 * @throws IllegalArgumentException
+	 * 			When the given args contains less then 2 elements or more then 3.
+	 */
 	protected Request(String[] args) throws IllegalArgumentException{
 		if(args.length<2){
 			giveIllegalArgument("Not enough arguments");
+			throw new IllegalArgumentException();
+		}
+		if(args.length > 3){
+			giveIllegalArgument("To many arguments");
 			throw new IllegalArgumentException();
 		}
 		command = extractCommand(args);		                        // Set the command
@@ -24,18 +39,34 @@ class Request {
 		port = extractPort(args);		                            // setting the port
 	}
 	
+	/**
+	 * Gets the command of this request.
+	 * @return the command of this request.
+	 */
 	protected HTTPCommands getCommand(){
 		return this.command;
 	}
 	
+	/**
+	 * Gets the Uri Host of this request.
+	 * @return the uriHost of this request.
+	 */
 	public String getURIHost(){
 		return this.uriHost;
 	}
 	
+	/**
+	 * Gets the Uri file of this request.
+	 * @return the uriFile of this request.
+	 */
 	public String getURIFile(){
 		return this.uriFile;
 	}
 	
+	/**
+	 * Gets the port of this request.
+	 * @return the port of this request.
+	 */
 	public int getPort(){
 		return this.port;
 	}
@@ -99,15 +130,26 @@ class Request {
 		return result;
 	}
 	
+	/**
+	 * Executes the command of this request.
+	 */
 	public void execute(){
 		command.executeRequest(this);
 	}
 	
+	/**
+	 * Displays a predefined message to the user in case of an illegal argument exception.
+	 */
 	public static void giveIllegalArgument(){
 		System.out.println("Invalid input, the input has to follow the syntax found on this page: ");
 		System.out.println("https://p.cygnus.cc.kuleuven.be/bbcswebdav/pid-19522495-dt-content-rid-95790460_2/courses/B-KUL-G0Q43a-1617/2017-Assignment2-Java.pdf");
 	}
 	
+	/**
+	 * Displays a predefined message to the user and some extra info about the cause of the error.
+	 * @param extraInfo
+	 * 			Extra information about what caused the error.
+	 */
 	public static void giveIllegalArgument(String extraInfo){
 		giveIllegalArgument();
 		System.out.println("Input error: "+extraInfo);
