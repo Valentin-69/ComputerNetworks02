@@ -3,7 +3,7 @@ package client;
 /**
  * A class that functions as the main method to run the client.
  *  
- * @author Valentin Cleays & Bart Breuls
+ * @author Valentin Claeys & Bart Breuls
  */
  class ClientMain {
 	
