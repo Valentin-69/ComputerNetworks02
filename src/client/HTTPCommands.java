@@ -329,7 +329,8 @@ enum HTTPCommands {
 			Socket socket= getSocket(request);
 			String host = prompt("Your host name: ");
 			// standaard body heeft de vorm: param=value
-			String body = prompt("Your message body: ");
+			String body = promptPUTBody("Your message: ");
+			System.out.println("body with promptPUTBody is: " + body); // TODO debug info
 			sendRequest(request, socket, host, body); // includes the fileWriter
 			BufferedReader br = initBuffReader(socket); // initiate the BufferedReader
 			System.out.println("RESULT: "); // Format info
@@ -341,6 +342,16 @@ enum HTTPCommands {
 		/*
 		 * ik ben niet zeker of dit text/http of application/x-www-form-urlencoded moet zijn
 		 */
+		
+		protected String promptPUTBody(String message){
+			System.out.print(message);
+	    	String result = scanner.next();
+	    	if (scanner.hasNextLine()){
+		    	result += scanner.nextLine();
+	    	}
+		    return result;
+		}
+		
 		private final String textType = "text/http";
 		
 		private void manageOutput(BufferedReader br) {
