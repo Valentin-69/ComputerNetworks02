@@ -8,6 +8,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -15,6 +17,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Scanner;
 import java.util.TimeZone;
@@ -124,17 +127,10 @@ public enum HTTPCommands {
 				return;
 			}
 
-			if(file.equals(ServerMain.DEFAULT_FILE_PATH)){
-				writeNotModifiedHeaderToStream(socketStream,true);
-				return;
-			}
-			
-			if(writeNewServerFile(request.getFile(),request.getBody())){
-				writeOKHeaderToStream(socketStream, true);
-			}else{
-				writeNotModifiedHeaderToStream(socketStream,true);
-			};
+			respondForNormalPut(socketStream, file, request);
+
 		}
+		
 
 		
 	},
@@ -147,10 +143,32 @@ public enum HTTPCommands {
 
 		@Override
 		protected void respond(Socket socket, ParsedRequest request) {
-			// TODO Auto-generated method stub
+			String file = request.getFile();
+			if(file==null || file.isEmpty() || (file.length()==1 && file.substring(0, 1).equals("/"))){
+				file=ServerMain.DEFAULT_FILE_PATH;
+			}
+			BufferedOutputStream socketStream = getBufferedOutputStreamFromSocket(socket);
+			if(socketStream==null){
+				System.out.println("could not create stream to socket");
+				return;
+			}
+
+			if(request.getHeaderMap().containsKey(ServerMain.CONTENT_TYPE)&&
+					request.getHeaderMap().get(ServerMain.CONTENT_TYPE).contains("urlencoded")){
+				respondForContentPost(socketStream,file,request);
+			}else{
+				respondForNormalPut(socketStream,file,request);
+			}
 			
 		}
 
+		private void respondForContentPost(BufferedOutputStream socketStream, String file, ParsedRequest request){
+			if(!ServerMain.POST_FORMS.contains(file)){
+				throw new IllegalArgumentException();
+			}
+			
+		}
+		
 	};
 	protected static Scanner scanner = new Scanner(System.in);
 
@@ -167,6 +185,19 @@ public enum HTTPCommands {
 		throw new IllegalArgumentException();
 	}
 
+	private static void respondForNormalPut(BufferedOutputStream socketStream,String file, ParsedRequest request){
+		if(file.equals(ServerMain.DEFAULT_FILE_PATH) || ServerMain.POST_FORMS.contains(file)){
+			writeServerErrorHeaderToStream(socketStream,true);
+			return;
+		}
+		
+		if(writeNewServerFile(file,request.getBody())){
+			writeOKHeaderToStream(socketStream, true);
+		}else{
+			writeServerErrorHeaderToStream(socketStream,true);
+		};
+	}
+	
 	protected static BufferedWriter GetWriterToSocket(Socket socket){
 		try {
 			return new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
@@ -260,15 +291,53 @@ public enum HTTPCommands {
 	}
 	
 	protected static boolean writeNewServerFile(String file, String body) {
+		BufferedOutputStream stream = getStreamToServerFile(file);
+		if(stream==null){
+			return false;
+		}
+		writeStringToStream(body, stream, true);
 		try {
-			BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(new File("serverFiles"+file)));
-			writeStringToStream(body, stream, true);
 			stream.close();
 			return true;
 		} catch (IOException e) {
 			e.printStackTrace();
 			return false;
 		}
+
 		
+	}
+	
+	protected static boolean updateServerPostFile(String file, HashMap<String, String> attributeToValueMap){
+		if(!ServerMain.POST_FORMS.contains(file)){
+			throw new IllegalArgumentException();
+		}
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader("serverFiles"+file));
+			BufferedWriter writer = new BufferedWriter(new FileWriter("serverFiles"+file));
+			String line;
+			while(!(line = reader.readLine()).isEmpty()){
+				if(line.contains(":") && attributeToValueMap.containsKey(line.substring(0, line.indexOf(":")))){
+					writer.write(line.substring(0, line.indexOf(":"))+": "+attributeToValueMap.get(line.substring(0, line.indexOf(":"))));
+					attributeToValueMap.remove(line.substring(0, line.indexOf(":")));
+				}else{
+					writer.write(line);
+					writer.write("\r\n");
+				}
+			}
+
+			return true;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	protected static BufferedOutputStream getStreamToServerFile(String file){
+		try {
+			return new BufferedOutputStream(new FileOutputStream(new File("serverFiles"+file)));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 }

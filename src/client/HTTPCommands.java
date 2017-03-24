@@ -13,7 +13,6 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import javax.swing.plaf.synth.SynthSeparatorUI;
 
 /**
  * A class that contains the four possible commands the client can execute,

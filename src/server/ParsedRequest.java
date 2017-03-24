@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.HashMap;
 
 class ParsedRequest {
 	
@@ -15,6 +16,7 @@ class ParsedRequest {
 	private String file;
 	private String hostName;
 	private String body="";
+	private HashMap<String, String> headerMap = new HashMap<>();
 	
 	
 	protected ParsedRequest(BufferedReader reader, Socket socket) throws IllegalStateException{
@@ -50,6 +52,9 @@ class ParsedRequest {
 			System.out.println("-------------------");
 			while(!(line = reader.readLine()).isEmpty()){
 				System.out.println(line);
+				headerMap.put(
+						line.substring(0,line.indexOf(":")),
+						line.substring(line.indexOf(" "),line.length()));
 			}
 			System.out.println("");
 			System.out.println("BODY");
@@ -77,6 +82,10 @@ class ParsedRequest {
 		return body;
 	}
 	
+	protected HashMap<String, String> getHeaderMap(){
+		return headerMap;
+	}
+	
 	private void badRequest(Socket socket){
 		System.out.println("bad request");
 		try {
@@ -101,6 +110,6 @@ class ParsedRequest {
 	
 	@Override
 	public String toString() {
-		return "PR:["+command+";"+file+";"+hostName+"]";
+		return "PR:["+command+";"+file+";"+hostName+";"+headerMap+";"+body+"]";
 	}
 }
