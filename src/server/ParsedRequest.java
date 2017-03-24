@@ -1,5 +1,6 @@
 package server;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -13,6 +14,7 @@ class ParsedRequest {
 	private HTTPCommands command;
 	private String file;
 	private String hostName;
+	private String body="";
 	
 	
 	protected ParsedRequest(BufferedReader reader, Socket socket) throws IllegalStateException{
@@ -46,23 +48,55 @@ class ParsedRequest {
 			System.out.println("");
 			System.out.println("NON OBLIGATORY HEAD");
 			System.out.println("-------------------");
-			while(reader.ready()){
-				System.out.print(Character.toString((char) reader.read()));
+			while(!(line = reader.readLine()).isEmpty()){
+				System.out.println(line);
 			}
+			System.out.println("");
+			System.out.println("BODY");
+			System.out.println("-------------------");
+
+			while(reader.ready()){
+				char charToAdd = (char) reader.read();
+				body+=Character.toString(charToAdd);
+				System.out.print(Character.toString(charToAdd));
+			}
+			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			serverError(socket);
 			e.printStackTrace();
 		}
 		System.out.println(this);
 
 	}
 	
+	protected String getFile(){
+		return file;
+	}
+	
+	protected String getBody(){
+		return body;
+	}
+	
 	private void badRequest(Socket socket){
 		System.out.println("bad request");
+		try {
+			HTTPCommands.writeBadRequestHeaderToStream(new BufferedOutputStream(socket.getOutputStream()), true);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void serverError(Socket socket){
+		System.out.println("server error");
+		try{
+			HTTPCommands.writeServerErrorHeaderToStream(new BufferedOutputStream(socket.getOutputStream()), true);
+		}catch(IOException e){
+			e.printStackTrace();
+		}
 	}
 	
 	protected void respond(Socket socket){
-		command.respond(socket,file);
+		command.respond(socket,this);
 	}
 	
 	@Override
