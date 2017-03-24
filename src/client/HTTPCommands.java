@@ -478,10 +478,35 @@ enum HTTPCommands {
 			writer.flush();
 		}		
 	};
-	
+	/**
+	 * This scanner is used for extra input from the user.
+	 */
 	protected static Scanner scanner = new Scanner(System.in);
 
+	/**
+	 * Checks if the given type if correct.
+	 * 
+	 * @param type
+	 * 			The type to check.
+	 * @return True if the type is correct, else false.
+	 */
 	protected abstract boolean isCorrectType(String type);
+	
+	/**
+	 * Executes the given request.
+	 * 
+	 * @param request
+	 * 			The request to execute.
+	 * @throws IllegalArgumentException
+	 * 			When an IOException occurs when trying to create a PrintWriter.
+	 * 			When an IOException occurs when trying to create a BufferedReader.
+	 * 			When an IOException occurs when trying to get the Socket.
+	 * 			When an UnknownHostException occurs when trying to get the Socket.
+	 * 			
+	 * @throws IllegalStateException
+	 * 			When an IOException occurs when trying to close the socket.
+	 * 		    When an IOException occurs when trying create a FileWriter.
+	 */
 	protected abstract void executeRequest(Request request) throws IllegalArgumentException, IllegalStateException;
 
 	private void sendRequest(Request request, Socket socket, String host){
