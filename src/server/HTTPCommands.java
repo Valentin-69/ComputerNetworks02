@@ -324,6 +324,13 @@ public enum HTTPCommands {
 					writer.write("\r\n");
 				}
 			}
+			for (String attribute : attributeToValueMap.keySet()) {
+				writer.write(attribute+": "+attributeToValueMap.get(attribute));
+				writer.write("\r\n");
+			}
+			writer.flush();
+			reader.close();
+			writer.close();
 
 			return true;
 		} catch (IOException e) {
