@@ -19,7 +19,11 @@ enum HTTPCommands {
 	
 
 	GET{
-
+		/**
+		 * Checks if the given type is GET.
+		 * 
+		 * returns true if the given type equals GET without case sensitivity, else false.
+		 */
 		@Override
 		protected boolean isCorrectType(String type) {
 			return type.equalsIgnoreCase("GET");
@@ -38,7 +42,15 @@ enum HTTPCommands {
 			closeReaderWriter(fw, br); // Closes used writer and reader
 			closeSocket(socket);
 		}
-
+		
+		/**
+		 * Closes the given FileWriter and BufferedReader.
+		 * 
+		 * @param fw
+		 * 			The FileWriter to close.
+		 * @param br
+		 * 			The BufferedReader to close.
+		 */
 		private void closeReaderWriter(FileWriter fw, BufferedReader br) {
 			try {
 				br.close();
@@ -49,6 +61,23 @@ enum HTTPCommands {
 			}
 		}
 
+		/**
+		 * Manages the result of the server by writing it to a file called out.html and printing
+		 * it in the console.
+		 * 
+		 * @param fw
+		 * 			FileWriter used to write the result of the server.
+		 * @param br
+		 * 			BufferedReader used to read the answer of the server.
+		 * @param uriHost
+		 * 			The host you are connecting to.
+		 * @param writerToHost
+		 * 			PrintWriter used to send information to the server.
+		 * @param hostName
+		 * 			String used as host for HTTP/1.1
+		 * @param socketReader
+		 * 			TODO not sure/ Same as br.
+		 */
 		private void manageOutput(FileWriter fw, BufferedReader br, String uriHost, PrintWriter writerToHost, String hostName, BufferedReader socketReader) {
 			try {
 				ArrayList<String> relativeImagePaths = new ArrayList<>();
@@ -73,6 +102,14 @@ enum HTTPCommands {
 			}
 		}
 
+		/**
+		 *TODO
+		 * @param relativeFilePaths
+		 * @param writerToHost
+		 * @param hostName
+		 * @param socketReader
+		 * @throws IOException
+		 */
 		private void getFiles(ArrayList<String> relativeFilePaths, PrintWriter writerToHost, String hostName,BufferedReader socketReader) throws IOException {
 			for (String relativePath : relativeFilePaths) {
 				sendGetRequest(writerToHost, relativePath, hostName);
@@ -80,6 +117,12 @@ enum HTTPCommands {
 			}
 		}
 
+		/**
+		 * TODO
+		 * @param relativePath
+		 * @param socketReader
+		 * @throws IOException
+		 */
 		private void saveFile(String relativePath, BufferedReader socketReader) throws IOException {
 			if(relativePath.contains("/")){
 				File newFile = new File("output/"+relativePath.substring(0,relativePath.indexOf("/")));
@@ -93,6 +136,13 @@ enum HTTPCommands {
 			writer.close();
 		}
 
+		/**
+		 * Initiates the FileWriter with the given file name.
+		 * 
+		 * @param fileName
+		 * 			Name for the output file.
+		 * @return A FileWriter which writes to the the file with the given file name.
+		 */
 		private FileWriter initiateFileWriter(String fileName) {
 			try {
 				FileWriter result = new FileWriter("output/"+fileName);
@@ -104,6 +154,18 @@ enum HTTPCommands {
 			}
 		}
 
+		/**
+		 * Initiates a PrintWriter that sends data to the server that this client
+		 * is connected to and activates the actual request.
+		 * 
+		 * @param request
+		 * 			This request contains the method, URI and port number.
+		 * @param socket
+		 * 			The socket that is connected to the server.
+		 * @param host
+		 * 			The host used in HTTP/1.1
+		 * @return	A PrintWriter which sends data to the connected server.
+		 */
 		private PrintWriter sendRequest(Request request, Socket socket, String host){
 			PrintWriter pw;
 			try {
@@ -116,6 +178,16 @@ enum HTTPCommands {
 			return pw;
 		}
 		
+		/**
+		 * Sends the actual GET request to the connected server.
+		 * 
+		 * @param writer
+		 * 			The PrintWriter that sends the data to the connected server.
+		 * @param filePath
+		 * 			The path of the file the client wants to get.
+		 * @param host
+		 * 			The host used for HTTP/1.1.
+		 */
 		private void sendGetRequest(PrintWriter writer,String filePath, String host){
 			writer.println("GET "+filePath+ " HTTP/1.1");
 			writer.println("Host: "+host);
@@ -123,6 +195,15 @@ enum HTTPCommands {
 			writer.flush();
 		}
 		
+		/**
+		 * Gets the relative path of the images in the given line.
+		 * 
+		 * @param line
+		 * 			A String of HTML possibly containing the path of images.
+		 * @param uriHost
+		 * 			The host of the URI this client is connected to.
+		 * @return An ArrayList<String> with all the relative paths of all images found in the given line.
+		 */
 		private ArrayList<String> getRelativeImagePathsFromLine(String line, String uriHost){
 			ArrayList<String> result = new ArrayList<>();
 			int index =line.indexOf("<img");
@@ -143,10 +224,26 @@ enum HTTPCommands {
 			return result;
 		}
 
+		/**
+		 * Checks if the given cutImage is an absolute path.
+		 * 
+		 * @param cutImage
+		 * 			The String to check.
+		 * @return True if the given cutImage contains :// or it has a length larger than 2 and the
+		 * 			first three characters are www, else false.
+		 */
 		private boolean isAbsolutePath(String cutImage) {
 			return cutImage.contains("://") || (cutImage.length()>2 && cutImage.substring(0,3).equals("www"));
 		}
-		
+		/**
+		 * Removes the host from the given URL. 
+		 * 
+		 * @param url
+		 * 			The URL to remove the host from.
+		 * @param host
+		 * 			The host to remove from the given URL.
+		 * @return A string which contains the given URL without the given host.
+		 */
 		private String removeHost(String url, String host){
 			if(! url.contains(host))
 				return url;
@@ -155,7 +252,11 @@ enum HTTPCommands {
 		
 	},
 	HEAD{
-
+		/**
+		 * Checks if the given type is HEAD.
+		 * 
+		 * returns true if the given type equals HEAD without case sensitivity, else false.
+		 */
 		@Override
 		protected boolean isCorrectType(String type) {
 			return type.equalsIgnoreCase("HEAD");
@@ -213,7 +314,11 @@ enum HTTPCommands {
 		
 	},
 	PUT{
-
+		/**
+		 * Checks if the given type is PUT.
+		 * 
+		 * returns true if the given type equals PUT without case sensitivity, else false.
+		 */
 		@Override
 		protected boolean isCorrectType(String type) {
 			return type.equalsIgnoreCase("PUT");
@@ -293,12 +398,16 @@ enum HTTPCommands {
 		
 	},
 	POST{
-
+		/**
+		 * Checks if the given type is POST.
+		 * 
+		 * returns true if the given type equals POST without case sensitivity, else false.
+		 */
 		@Override
 		protected boolean isCorrectType(String type) {
 			return type.equalsIgnoreCase("POST");
 		}
-
+		
 		@Override
 		protected void executeRequest(Request request) {
 			Socket socket= getSocket(request);
