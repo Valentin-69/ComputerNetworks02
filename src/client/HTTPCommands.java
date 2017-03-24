@@ -499,6 +499,7 @@ enum HTTPCommands {
 			e.printStackTrace();
 		}
 	}
+	
 	/**
 	 * Gets the type of the given type;
 	 * 
@@ -549,7 +550,20 @@ enum HTTPCommands {
 	    return result;
 	}
 	
-	protected static Socket getSocket(Request request){
+	/**
+	 * Gets a socket that is connected to the URIHost of the given request through
+	 * the port of the given request.
+	 * 
+	 * @param request
+	 * 			The request which contains the URIHost to connect to and
+	 * 			the port for the socket.
+	 * @return A socket which is connected to the URIHost of the given request through
+	 * 			the port of the given request.
+	 * @throws IllegalArgumentException
+	 * 			When an UnknownHostException occurs while trying to create a new socket.
+	 * 			When an IOException occurs while trying to create a new socket.
+	 */
+	protected static Socket getSocket(Request request) throws IllegalArgumentException{
 		try {
 			return new Socket(request.getURIHost(), request.getPort());
 		} catch (UnknownHostException e) {
@@ -576,6 +590,15 @@ enum HTTPCommands {
 		}
 	}
 	
+	/**
+	 * Initialize a BufferedReader that reads the output of given socket.
+	 * 
+	 * @param socket
+	 * 			The socket of which the new BufferedReader will read the output.
+	 * @return A new BufferedReader that reads the output of the given socket.
+	 * @throws IllegalArgumentException
+	 * 			When an IOException occurs when trying to create the BufferedReader.
+	 */
 	private static BufferedReader initBuffReader(Socket socket) throws IllegalArgumentException{
 		try {			
 			BufferedReader result = new BufferedReader(new InputStreamReader(socket.getInputStream()));
