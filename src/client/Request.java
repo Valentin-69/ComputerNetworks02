@@ -12,7 +12,7 @@ class Request {
 	private final String uriFile;
 	private final int port;
 	
-	/**
+	/** 
 	 * Create a new request with the given argument. The given argument should look like this:
 	 * [command, uri, port]. The port is optional, the other two are not. From the Uri it
 	 * extracts the uri host and the uri file. If there is no port given in the args, it is set
