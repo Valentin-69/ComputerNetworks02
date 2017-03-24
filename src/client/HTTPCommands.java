@@ -223,6 +223,7 @@ enum HTTPCommands {
 		protected void executeRequest(Request request) {
 			Socket socket= getSocket(request);
 			String host = prompt("Your host name: ");
+			
 			closeSocket(socket);
 		}
 		
@@ -251,7 +252,7 @@ enum HTTPCommands {
 		/*
 		 * ik ben niet zeker of dit text/http of application/x-www-form-urlencoded moet zijn
 		 */
-		private final String textType = "application/x-www-form-urlencoded";
+		private final String textType = "text/http";
 		
 		private void manageOutput(BufferedReader br) {
 			try {
@@ -281,6 +282,13 @@ enum HTTPCommands {
 		 * Vergeet zeker de blanco lijnen niet!
 		 */
 		private void sendPostRequest(PrintWriter writer,String filePath, String host, String body){
+			System.out.println("POST " +filePath+ " HTTP/1.1");//TODO debug info
+			System.out.println("Host: " + host);//TODO debug info
+			System.out.println("Content-Type: " + textType);//TODO debug info
+			System.out.println("Content-Length: " + body.length());//TODO debug info
+			System.out.println("");//TODO debug info
+			System.out.println(body);//TODO debug info
+			System.out.println("");//TODO debug info
 			writer.println("POST "+filePath+ " HTTP/1.1");
 			writer.println("Host: "+host);
 			writer.println("Content-Type: " + textType);
