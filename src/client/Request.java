@@ -66,7 +66,7 @@ class Request {
 			args[1]=args[1].substring(args[1].indexOf("://")+3, args[1].length()); // for dealing with the http:// of the URI.
 		}
 		String[] result = new String[2];
-		int index= args[1].indexOf("/",args[1].indexOf("."));
+		int index= args[1].indexOf("/");
 		String host, file;
 		if(index!=-1){ //there is a / after a point in the string
 			host = args[1].substring(0, index);

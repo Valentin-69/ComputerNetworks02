@@ -540,7 +540,7 @@ enum HTTPCommands {
 		try {
 			return new Socket(request.getURIHost(), request.getPort());
 		} catch (UnknownHostException e) {
-			System.out.println("The given uri isn't a valid host.");
+			System.out.println("The given uri isn't a valid host. HostURI: "+request.getURIHost());
 			throw new IllegalArgumentException();
 		} catch (IOException e) {
 			System.out.println("Unable to connect to: "+request.getURIHost()+":"+request.getPort());

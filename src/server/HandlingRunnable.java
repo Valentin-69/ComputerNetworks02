@@ -32,7 +32,6 @@ class HandlingRunnable implements Runnable{
 		request.respond(socket);
 		
 		try {
-			System.out.println("closing socket");
 			socket.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -40,15 +39,16 @@ class HandlingRunnable implements Runnable{
 			return;
 		}
 		System.out.println("closing thread, cause: done");
-		System.out.println();
-		System.out.println();
-		System.out.println();
-		System.out.println();
+
 		try {
 			this.finalize();
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
+		System.out.println();
+		System.out.println();
+		System.out.println();
+		System.out.println();
 	}
 
 }
