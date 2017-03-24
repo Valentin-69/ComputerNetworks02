@@ -1,5 +1,10 @@
 package client;
 
+/**
+ * A class which contains information about the command that has to be
+ * executed and information about the server to which the client must connect.
+ * @author Valentin Cleays & Bart Breuls
+ */
 class Request {
 	
 	private final HTTPCommands command;

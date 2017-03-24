@@ -15,6 +15,12 @@ import java.util.Scanner;
 
 import javax.swing.plaf.synth.SynthSeparatorUI;
 
+/**
+ * A class that contains the four possible commands the client can execute,
+ * being GET, HEAD, PUT and POST. 
+ * 
+ * @author Valentin Cleays & Bart Breuls
+ */
 enum HTTPCommands {
 	
 
