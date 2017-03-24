@@ -53,6 +53,8 @@ public enum HTTPCommands {
 			}
 			
 			writeOKHeaderToStream(socketStream,new File("serverFiles"+file),false);
+			//new File("serverFiles"+file);
+			writeOKHeaderToStream(socketStream,false);
 			
 			try {
 				while(fileStream.available()!=0){
@@ -233,9 +235,11 @@ public enum HTTPCommands {
 		}
 	}
 	
-	protected static String getHeaderEnd(File file) {
+	protected static String getHeaderEnd(File file){
+		if(file==null)
+			return "Date: "+getServerTime()+"\r\n\r\n";
 		String fileInfo = "";
-		if(file!=null){
+		if(file!=null){ 
 			String contentType;
 			if(file.getName().contains(".jpg") || file.getName().contains(".png") || file.getName().contains(".gif") ||
 					file.getName().contains(".JPG") || file.getName().contains(".PNG") || file.getName().contains(".GIF")){
@@ -260,11 +264,20 @@ public enum HTTPCommands {
 			
 		}
 
-		return "Date: "+getServerTime()+"\r\n"+fileInfo+"\r\n\r\n";
+		return "Date: "+getServerTime()+"\r\n"+fileInfo+"\r\n";
+	}
+	
+	protected static String getHeaderEnd() {
+		return "Date: "+getServerTime()+"\r\n\r\n";
 	}
 	
 	protected static void writeOKHeaderToStream(BufferedOutputStream stream,File file, boolean end){
 		String okHead = "HTTP/1.1 200 OK \r\n"+getHeaderEnd(file);
+		writeStringToStream(okHead, stream,end);
+	}
+	
+	protected static void writeOKHeaderToStream(BufferedOutputStream stream, boolean end){
+		String okHead = "HTTP/1.1 200 OK \r\n"+getHeaderEnd();
 		writeStringToStream(okHead, stream,end);
 
 	}
@@ -280,10 +293,22 @@ public enum HTTPCommands {
 		writeStringToStream(badRequest, stream,end);
 	}
 	
+	protected static void writeBadRequestHeaderToStream(BufferedOutputStream stream, boolean end){
+		String badRequest = "HTTP/1.1 400 Bad Request\r\n"+getHeaderEnd(null);
+		writeStringToStream(badRequest, stream,end);
+	}
+
+	
 	protected static void writeServerErrorHeaderToStream(BufferedOutputStream stream,File file, boolean end){
 		String serverError = "HTTP/1.1 500 Server Error\r\n"+getHeaderEnd(file);
 		writeStringToStream(serverError, stream,end);
 	}
+	
+	protected static void writeServerErrorHeaderToStream(BufferedOutputStream stream, boolean end){
+		String serverError = "HTTP/1.1 500 Server Error\r\n"+getHeaderEnd(null);
+		writeStringToStream(serverError, stream,end);
+	}
+
 	
 	protected static void writeNotModifiedHeaderToStream(BufferedOutputStream stream,File file, boolean end){
 		String notModified = "HTTP/1.1 304 Not Modified\r\n"+getHeaderEnd(file);

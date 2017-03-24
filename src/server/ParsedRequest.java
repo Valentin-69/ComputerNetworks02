@@ -89,7 +89,7 @@ class ParsedRequest {
 	private void badRequest(Socket socket){
 		System.out.println("bad request");
 		try {
-			HTTPCommands.writeBadRequestHeaderToStream(new BufferedOutputStream(socket.getOutputStream()),null, true);
+			HTTPCommands.writeBadRequestHeaderToStream(new BufferedOutputStream(socket.getOutputStream()), true);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -98,7 +98,7 @@ class ParsedRequest {
 	private void serverError(Socket socket){
 		System.out.println("server error");
 		try{
-			HTTPCommands.writeServerErrorHeaderToStream(new BufferedOutputStream(socket.getOutputStream()),null, true);
+			HTTPCommands.writeServerErrorHeaderToStream(new BufferedOutputStream(socket.getOutputStream()), true);
 		}catch(IOException e){
 			e.printStackTrace();
 		}
