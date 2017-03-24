@@ -517,7 +517,11 @@ enum HTTPCommands {
 		protected void executeRequest(Request request) {
 			Socket socket= getSocket(request);
 			String host = prompt("Your host name: ");
-			String body = prompt("Your message body url-encoded: ");
+			String body = prompt("Your message body: ");
+			if (isUrlEncoded(body)){
+				isUrlEncoded = true;
+			}
+			System.out.println(isUrlEncoded);
 			sendRequest(request, socket, host, body); // includes the fileWriter
 			BufferedReader br = initBuffReader(socket); // initiate the BufferedReader
 			System.out.println("RESULT: "); // Format info
@@ -527,6 +531,25 @@ enum HTTPCommands {
 			closeSocket(socket);
 		}
 
+		/**
+		 * Variable indicating if the body message is url encoded.
+		 */
+		private boolean isUrlEncoded = false;
+		
+		/**
+		 * Checks if the given message is url encoded.
+		 * 
+		 * @param message
+		 * 			The message to check.
+		 * @return True if the given message is url encoded, else false.
+		 */
+		private boolean isUrlEncoded(String message){
+			if (message.contains(" ") || ! message.contains("=")){
+				return false;
+			}
+			return true;
+		}
+		
 		/**
 		 * Manages the result of the server by printing it in the console.
 		 * 
@@ -583,7 +606,12 @@ enum HTTPCommands {
 		private void sendPostRequest(PrintWriter writer,String filePath, String host, String body){
 			writer.println("POST "+filePath+ " HTTP/1.1");
 			writer.println("Host: "+host);
-			writer.println("Content-Type: " +urlEncoded);
+			if (isUrlEncoded){
+				writer.println("Content-Type: " +urlEncoded);
+			}
+			else{
+				writer.println("Content-Type: " + httpText);
+			}
 			writer.println("Content-Length: " + body.length());
 			writer.println("");
 			writer.println(body);
@@ -748,7 +776,7 @@ enum HTTPCommands {
 	/**
 	 * Constant used to indicate the content-type of http text.
 	 */
-	protected final static String httpText = "text/http";
+	protected final String httpText = "text/http";
 	
 	/**
 	 * Constant used to indicate the content-type of an url encoded message.
