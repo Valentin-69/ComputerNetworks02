@@ -107,6 +107,9 @@ enum HTTPCommands {
 				String line;
 				boolean headDone = false;
 				while((line = br.readLine()) != null){
+					if(headDone &&!socketReader.ready()){
+						break;
+					}
 					System.out.println(line);
 					if(line.isEmpty()){
 						headDone=true;
@@ -133,12 +136,7 @@ enum HTTPCommands {
 		 */
 		private void getFiles(ArrayList<String> relativeFilePaths, PrintWriter writerToHost, String hostName,BufferedReader socketReader) throws IOException {
 			for (String relativePath : relativeFilePaths) {
-				if(!relativePath.substring(0, 1).equals("/")){
-					relativePath = "/"+relativePath;
-				}
-				System.out.println("getting "+relativePath);
 				sendGetRequest(writerToHost, relativePath, hostName);
-				System.out.println("sent request");
 				saveFile(relativePath, socketReader);
 				System.out.println("saved file");
 			}
@@ -176,7 +174,9 @@ enum HTTPCommands {
 		 */
 		private FileWriter initiateFileWriter(String fileName) {
 			try {
-				FileWriter result = new FileWriter("output/"+fileName);
+				File file = new File("output\\"+fileName);
+				file.getParentFile().mkdirs();
+				FileWriter result = new FileWriter(file);
 				return result;
 			} catch (IOException e1) {
 				System.out.println("could not create the fileWriter for: "+fileName);
@@ -222,6 +222,7 @@ enum HTTPCommands {
 		 * 			The host used for HTTP/1.1.
 		 */
 		private void sendGetRequest(PrintWriter writer,String filePath, String host){
+			System.out.println("sending: "+"GET "+filePath+ " HTTP/1.1");
 			writer.println("GET "+filePath+ " HTTP/1.1");
 			writer.println("Host: "+host);
 			writer.println("");

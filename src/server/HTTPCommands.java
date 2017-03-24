@@ -52,14 +52,14 @@ public enum HTTPCommands {
 				return;
 			}
 			
-
-			
-			writeOKHeaderToStream(socketStream,false);
+			writeOKHeaderToStream(socketStream,new File("serverFiles"+file),false);
 			
 			try {
 				while(fileStream.available()!=0){
 					socketStream.write(fileStream.read());
 				}
+				socketStream.write('\r');
+				socketStream.write('\n');
 				socketStream.flush();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -99,7 +99,7 @@ public enum HTTPCommands {
 				return;
 			}
 
-			writeOKHeaderToStream(socketStream,true);
+			writeOKHeaderToStream(socketStream,new File("serverFiles"+file),true);
 		}
 		
 		private void respondWhenFileFails(BufferedOutputStream stream,String file){
@@ -187,14 +187,14 @@ public enum HTTPCommands {
 
 	private static void respondForNormalPut(BufferedOutputStream socketStream,String file, ParsedRequest request){
 		if(file.equals(ServerMain.DEFAULT_FILE_PATH) || ServerMain.POST_FORMS.contains(file)){
-			writeServerErrorHeaderToStream(socketStream,true);
+			writeServerErrorHeaderToStream(socketStream,null,true);
 			return;
 		}
 		
 		if(writeNewServerFile(file,request.getBody())){
-			writeOKHeaderToStream(socketStream, true);
+			writeOKHeaderToStream(socketStream,null, true);
 		}else{
-			writeServerErrorHeaderToStream(socketStream,true);
+			writeServerErrorHeaderToStream(socketStream,null,true);
 		};
 	}
 	
@@ -233,12 +233,38 @@ public enum HTTPCommands {
 		}
 	}
 	
-	protected static String getHeaderEnd() {
-		return "Date: "+getServerTime()+"\r\n\r\n";
+	protected static String getHeaderEnd(File file) {
+		String fileInfo = "";
+		if(file!=null){
+			String contentType;
+			if(file.getName().contains(".jpg") || file.getName().contains(".png") || file.getName().contains(".gif") ||
+					file.getName().contains(".JPG") || file.getName().contains(".PNG") || file.getName().contains(".GIF")){
+				contentType="image";
+			}else{
+				contentType="text";
+			}
+			fileInfo+="Content-Type: "+contentType+"\r\n";
+			
+			int contentLength;
+			if(file.length()>Integer.MAX_VALUE){
+				contentLength=Integer.MAX_VALUE;
+			}else{
+				contentLength = (int) file.length();
+			}
+			
+			fileInfo+="Content-Length: "+contentLength+"\r\n";
+			
+			String lastModified;
+			lastModified=getTime(file.lastModified());
+			fileInfo+="Last-Modified: "+lastModified+"\r\n";
+			
+		}
+
+		return "Date: "+getServerTime()+"\r\n"+fileInfo+"\r\n\r\n";
 	}
 	
-	protected static void writeOKHeaderToStream(BufferedOutputStream stream, boolean end){
-		String okHead = "HTTP/1.1 200 OK \r\n"+getHeaderEnd();
+	protected static void writeOKHeaderToStream(BufferedOutputStream stream,File file, boolean end){
+		String okHead = "HTTP/1.1 200 OK \r\n"+getHeaderEnd(file);
 		writeStringToStream(okHead, stream,end);
 
 	}
@@ -249,18 +275,18 @@ public enum HTTPCommands {
 	}
 	
 	
-	protected static void writeBadRequestHeaderToStream(BufferedOutputStream stream, boolean end){
-		String badRequest = "HTTP/1.1 400 Bad Request\r\n"+getHeaderEnd();
+	protected static void writeBadRequestHeaderToStream(BufferedOutputStream stream,File file, boolean end){
+		String badRequest = "HTTP/1.1 400 Bad Request\r\n"+getHeaderEnd(file);
 		writeStringToStream(badRequest, stream,end);
 	}
 	
-	protected static void writeServerErrorHeaderToStream(BufferedOutputStream stream, boolean end){
-		String serverError = "HTTP/1.1 500 Server Error\r\n"+getHeaderEnd();
+	protected static void writeServerErrorHeaderToStream(BufferedOutputStream stream,File file, boolean end){
+		String serverError = "HTTP/1.1 500 Server Error\r\n"+getHeaderEnd(file);
 		writeStringToStream(serverError, stream,end);
 	}
 	
-	protected static void writeNotModifiedHeaderToStream(BufferedOutputStream stream, boolean end){
-		String notModified = "HTTP/1.1 304 Not Modified\r\n"+getHeaderEnd();
+	protected static void writeNotModifiedHeaderToStream(BufferedOutputStream stream,File file, boolean end){
+		String notModified = "HTTP/1.1 304 Not Modified\r\n"+getHeaderEnd(file);
 		writeStringToStream(notModified, stream,end);
 	}
 		
@@ -288,6 +314,16 @@ public enum HTTPCommands {
 	        "EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
 	    dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 	    return dateFormat.format(calendar.getTime());
+	}
+	
+	protected static String getTime(long millis){
+	    Calendar calendar = Calendar.getInstance();
+	    calendar.setTimeInMillis(millis);
+	    SimpleDateFormat dateFormat = new SimpleDateFormat(
+	        "EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+	    dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+	    return dateFormat.format(calendar.getTime());
+
 	}
 	
 	protected static boolean writeNewServerFile(String file, String body) {
