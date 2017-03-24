@@ -223,8 +223,72 @@ enum HTTPCommands {
 		protected void executeRequest(Request request) {
 			Socket socket= getSocket(request);
 			String host = prompt("Your host name: ");
-			
+			// standaard body heeft de vorm: param=value
+			String body = prompt("Your message body: ");
+			sendRequest(request, socket, host, body); // includes the fileWriter
+			BufferedReader br = initBuffReader(socket); // initiate the BufferedReader
+			System.out.println("RESULT: "); // Format info
+			System.out.println("");		    // Format info
+			manageOutput(br); 	   // gets and writes the output of the GET command
+			closeReader(br); // Closes used writer and reader
 			closeSocket(socket);
+		}
+		/*
+		 * ik ben niet zeker of dit text/http of application/x-www-form-urlencoded moet zijn
+		 */
+		private final String textType = "text/http";
+		
+		private void manageOutput(BufferedReader br) {
+			try {
+				String line;
+				while((line = br.readLine()) != null){
+					System.out.println(line);
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		private void sendRequest(Request request, Socket socket, String host, String body){
+			PrintWriter pw;
+			try {
+				pw = new PrintWriter(socket.getOutputStream());
+			} catch (IOException e) {
+				e.printStackTrace();
+				throw new IllegalArgumentException();
+			}
+			// ik weet niet zeker of de filepath nu (request.getURIHost()+request.getURIFile() )
+			// moet zijn of gewoon (request.getURIFile)
+			sendPutRequest(pw,request.getURIFile(), host, body);
+		}
+		
+		/*
+		 * Vergeet zeker de blanco lijnen niet!
+		 */
+		private void sendPutRequest(PrintWriter writer,String filePath, String host, String body){
+			System.out.println("PUT " +filePath+ " HTTP/1.1");//TODO debug info
+			System.out.println("Host: " + host);//TODO debug info
+			System.out.println("Content-Type: " + textType);//TODO debug info
+			System.out.println("Content-Length: " + body.length());//TODO debug info
+			System.out.println("");//TODO debug info
+			System.out.println(body);//TODO debug info
+			System.out.println("");//TODO debug info
+			writer.println("PUT "+filePath+ " HTTP/1.1");
+			writer.println("Host: "+host);
+			writer.println("Content-Type: " + textType);
+			writer.println("Content-Length: " + body.length());
+			writer.println("");
+			writer.println(body);
+			writer.println("");
+			writer.flush();
+		}
+		
+		private void closeReader(BufferedReader br) {
+			try {
+				br.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 		
 	},
