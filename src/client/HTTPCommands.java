@@ -29,6 +29,24 @@ enum HTTPCommands {
 			return type.equalsIgnoreCase("GET");
 		}
 
+		/**
+		 * Executes the given request by getting the socket, asking for the host, 
+		 * sending the actual request, writing the results to an output file  and 
+		 * printing the results of the request to the console. It also closes the 
+		 * BufferedReader, the FileWriter and the socket.
+		 * 
+		 * @param request
+		 * 			The request to execute.
+		 * @throws IllegalArgumentException
+		 * 			When an IOException occurs when trying to create a PrintWriter.
+		 * 			When an IOException occurs when trying to create a BufferedReader.
+		 * 			When an IOException occurs when trying to get the Socket.
+		 * 			When an UnknownHostException occurs when trying to get the Socket.
+		 * 			
+		 * @throws IllegalStateException
+		 * 			When an IOException occurs when trying to close the socket.
+		 * 		    When an IOException occurs when trying create a FileWriter.
+		 */
 		@Override
 		protected void executeRequest(Request request) throws IllegalArgumentException, IllegalStateException{
 			Socket socket= getSocket(request);
@@ -262,8 +280,25 @@ enum HTTPCommands {
 			return type.equalsIgnoreCase("HEAD");
 		}
 
+		/**
+		 * Executes the given request by getting the socket, asking for the host, 
+		 * sending the actual request and printing the results of the request to the console. 
+		 * It also closes the BufferedReader and the socket.
+		 * 
+		 * @param request
+		 * 			The request to execute.
+		 * @throws IllegalArgumentException
+		 * 			When an IOException occurs when trying to create a PrintWriter.
+		 * 			When an IOException occurs when trying to create a BufferedReader.
+		 * 			When an IOException occurs when trying to get the Socket.
+		 * 			When an UnknownHostException occurs when trying to get the Socket.
+		 * 			
+		 * @throws IllegalStateException
+		 * 			When an IOException occurs when trying to close the socket.
+		 * 		    When an IOException occurs when trying create a FileWriter.
+		 */
 		@Override
-		public void executeRequest(Request request) throws IllegalArgumentException, IllegalStateException{
+		protected void executeRequest(Request request) throws IllegalArgumentException, IllegalStateException{
 			Socket socket= getSocket(request);
 			String host = prompt("Your host name: ");
 			sendRequest(request, socket, host); // includes the fileWriter
@@ -315,6 +350,23 @@ enum HTTPCommands {
 			return type.equalsIgnoreCase("PUT");
 		}
 
+		/**
+		 * Executes the given request by getting the socket, asking for the host and body of the message, 
+		 * sending the actual request and printing the results of the request to the console. It
+		 * also closes the BufferedReader and the socket.
+		 * 
+		 * @param request
+		 * 			The request to execute.
+		 * @throws IllegalArgumentException
+		 * 			When an IOException occurs when trying to create a PrintWriter.
+		 * 			When an IOException occurs when trying to create a BufferedReader.
+		 * 			When an IOException occurs when trying to get the Socket.
+		 * 			When an UnknownHostException occurs when trying to get the Socket.
+		 * 			
+		 * @throws IllegalStateException
+		 * 			When an IOException occurs when trying to close the socket.
+		 * 		    When an IOException occurs when trying create a FileWriter.
+		 */
 		@Override
 		protected void executeRequest(Request request) {
 			Socket socket= getSocket(request);
@@ -354,22 +406,10 @@ enum HTTPCommands {
 				e.printStackTrace();
 				throw new IllegalArgumentException();
 			}
-			// ik weet niet zeker of de filepath nu (request.getURIHost()+request.getURIFile() )
-			// moet zijn of gewoon (request.getURIFile)
 			sendPutRequest(pw,request.getURIFile(), host, body);
 		}
 		
-		/*
-		 * Vergeet zeker de blanco lijnen niet!
-		 */
 		private void sendPutRequest(PrintWriter writer,String filePath, String host, String body){
-			System.out.println("PUT " +filePath+ " HTTP/1.1");//TODO debug info
-			System.out.println("Host: " + host);//TODO debug info
-			System.out.println("Content-Type: " + textType);//TODO debug info
-			System.out.println("Content-Length: " + body.length());//TODO debug info
-			System.out.println("");//TODO debug info
-			System.out.println(body);//TODO debug info
-			System.out.println("");//TODO debug info
 			writer.println("PUT "+filePath+ " HTTP/1.1");
 			writer.println("Host: "+host);
 			writer.println("Content-Type: " + textType);
@@ -391,6 +431,23 @@ enum HTTPCommands {
 			return type.equalsIgnoreCase("POST");
 		}
 		
+		/**
+		 * Executes the given request by getting the socket, asking for the host and body of the message, 
+		 * sending the actual request and printing the results of the request to the console. It
+		 * also closes the BufferedReader and the socket.
+		 * 
+		 * @param request
+		 * 			The request to execute.
+		 * @throws IllegalArgumentException
+		 * 			When an IOException occurs when trying to create a PrintWriter.
+		 * 			When an IOException occurs when trying to create a BufferedReader.
+		 * 			When an IOException occurs when trying to get the Socket.
+		 * 			When an UnknownHostException occurs when trying to get the Socket.
+		 * 			
+		 * @throws IllegalStateException
+		 * 			When an IOException occurs when trying to close the socket.
+		 * 		    When an IOException occurs when trying create a FileWriter.
+		 */
 		@Override
 		protected void executeRequest(Request request) {
 			Socket socket= getSocket(request);
@@ -433,18 +490,8 @@ enum HTTPCommands {
 			// moet zijn of gewoon (request.getURIFile)
 			sendPostRequest(pw,request.getURIFile(), host, body);
 		}
-		
-		/*
-		 * Vergeet zeker de blanco lijnen niet!
-		 */
+
 		private void sendPostRequest(PrintWriter writer,String filePath, String host, String body){
-			System.out.println("POST " +filePath+ " HTTP/1.1");//TODO debug info
-			System.out.println("Host: " + host);//TODO debug info
-			System.out.println("Content-Type: " + textType);//TODO debug info
-			System.out.println("Content-Length: " + body.length());//TODO debug info
-			System.out.println("");//TODO debug info
-			System.out.println(body);//TODO debug info
-			System.out.println("");//TODO debug info
 			writer.println("POST "+filePath+ " HTTP/1.1");
 			writer.println("Host: "+host);
 			writer.println("Content-Type: " + textType);
