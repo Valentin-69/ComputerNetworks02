@@ -67,8 +67,8 @@ class ParsedRequest {
 			}
 			
 		} catch (IOException e) {
-			e.printStackTrace();
 			serverError(socket);
+			e.printStackTrace();
 		}
 		System.out.println(this);
 

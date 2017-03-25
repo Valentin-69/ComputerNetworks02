@@ -20,6 +20,7 @@ class HandlingRunnable implements Runnable{
 			return;
 		}
 		
+		
 		ParsedRequest request;
 		try{
 			request = new ParsedRequest(reader,socket);
@@ -27,7 +28,7 @@ class HandlingRunnable implements Runnable{
 			System.out.println("closing thread, cause: failed or bad request");
 			return;
 		}
-			
+		
 		request.respond(socket);
 		
 		try {

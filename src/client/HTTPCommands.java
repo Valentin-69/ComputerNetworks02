@@ -525,7 +525,7 @@ enum HTTPCommands {
 		protected void executeRequest(Request request) {
 			Socket socket= getSocket(request);
 			String host = prompt("Your host name: ");
-			String body = prompt("Your message body: ");
+			String body = promptLines("Your message body: ");
 			if (isUrlEncoded(body)){
 				isUrlEncoded = true;
 			}
@@ -700,8 +700,7 @@ enum HTTPCommands {
 	protected static String prompt(String message){
 		System.out.print(message);
     	String result = scanner.next();
-   		scanner.nextLine();
-    	System.out.println("result is " + result);
+   		//scanner.nextLine();
 	    return result;
 	}
 	
@@ -713,12 +712,10 @@ enum HTTPCommands {
 	 * @return The input from the user.
 	 */
 	protected String promptLines(String message){
-		System.out.print(message);
     	String result = scanner.next();
     	if (scanner.hasNextLine()){
 	    	result += scanner.nextLine();
     	}
-    	System.out.println("result is " + result);
 	    return result;
 	}
 	
